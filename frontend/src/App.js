@@ -162,8 +162,12 @@ const App = () => {
       localStorage.setItem('token', access_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
       setUser(userData);
+      playSound('success');
+      toast.success('🥷 Welcome back, Digital Ninja!');
       loadDashboardData();
     } catch (error) {
+      playSound('error');
+      toast.error('Login failed: ' + (error.response?.data?.detail || 'Invalid credentials'));
       throw new Error(error.response?.data?.detail || 'Login failed');
     }
   };
@@ -172,14 +176,60 @@ const App = () => {
     localStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
+    playSound('notification');
+    toast.success('👋 See you later, ninja!');
   };
 
   const createEmployee = async (employeeData) => {
     try {
       await axios.post(`${API}/employees`, employeeData);
+      playSound('success');
+      toast.success('🚀 New ninja added to the team!');
       loadDashboardData();
     } catch (error) {
+      playSound('error');
+      toast.error('Failed to create employee: ' + (error.response?.data?.detail || error.message));
       throw new Error(error.response?.data?.detail || 'Failed to create employee');
+    }
+  };
+
+  const updateEmployee = async (employeeId, updateData) => {
+    try {
+      const response = await axios.put(`${API}/employees/${employeeId}/profile`, updateData);
+      playSound('success');
+      toast.success('✨ Employee profile updated successfully!');
+      loadDashboardData();
+      return response.data;
+    } catch (error) {
+      playSound('error');
+      toast.error('Update failed: ' + (error.response?.data?.detail || error.message));
+      throw new Error(error.response?.data?.detail || 'Failed to update employee');
+    }
+  };
+
+  const analyzeEmployeeWithAI = async (employeeId) => {
+    try {
+      const response = await axios.post(`${API}/ai/analyze-employee?employee_id=${employeeId}`);
+      playSound('notification');
+      toast.success('🧠 AI analysis completed!');
+      return response.data;
+    } catch (error) {
+      playSound('error');
+      toast.error('AI analysis failed: ' + (error.response?.data?.detail || error.message));
+      throw new Error(error.response?.data?.detail || 'AI analysis failed');
+    }
+  };
+
+  const getAITaskSuggestions = async () => {
+    try {
+      const response = await axios.get(`${API}/ai/task-suggestions`);
+      playSound('notification');
+      toast.success('🎯 AI suggestions loaded!');
+      return response.data;
+    } catch (error) {
+      playSound('error');
+      toast.error('Failed to get AI suggestions');
+      throw new Error(error.response?.data?.detail || 'Failed to get suggestions');
     }
   };
 
