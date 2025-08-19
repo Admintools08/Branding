@@ -340,38 +340,76 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '12px',
+            fontSize: '14px',
+            fontWeight: '500'
+          }
+        }}
+      />
       <Header user={user} onLogout={logout} />
+      
       <div className="flex">
-        <Sidebar currentView={currentView} onViewChange={setCurrentView} />
+        <Sidebar 
+          currentView={currentView} 
+          onViewChange={(view) => {
+            setCurrentView(view);
+            playSound('click');
+          }} 
+        />
         <main className="flex-1 p-6">
-          {currentView === 'dashboard' && (
-            <Dashboard 
-              stats={dashboardStats} 
-              activities={recentActivities}
-              employees={employees}
-              tasks={tasks}
-              onUpdateTask={updateTaskStatus}
-            />
-          )}
-          {currentView === 'employees' && (
-            <EmployeeManagement 
-              employees={employees}
-              onCreateEmployee={createEmployee}
-              onUpdateEmployee={updateEmployeeStatus}
-              onDeleteEmployee={deleteEmployee}
-              onImportFromExcel={importFromExcel}
-              tasks={tasks}
-              onDownloadReport={downloadReport}
-            />
-          )}
-          {currentView === 'tasks' && (
-            <TaskManagement 
-              tasks={tasks}
-              employees={employees}
-              onUpdateTask={updateTaskStatus}
-              onDownloadReport={downloadReport}
-            />
-          )}
+          <Tabs value={currentView} onValueChange={setCurrentView} className="w-full">
+            <TabsList className="hidden">
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="employees">Employees</TabsTrigger>
+              <TabsTrigger value="tasks">Tasks</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="dashboard" className="mt-0">
+              <Dashboard 
+                stats={dashboardStats} 
+                activities={recentActivities}
+                employees={employees}
+                tasks={tasks}
+                onUpdateTask={updateTaskStatus}
+                onGetAISuggestions={getAITaskSuggestions}
+                aiInsights={aiInsights}
+                setAiInsights={setAiInsights}
+              />
+            </TabsContent>
+            
+            <TabsContent value="employees" className="mt-0">
+              <EmployeeManagement 
+                employees={employees}
+                onCreateEmployee={createEmployee}
+                onUpdateEmployee={updateEmployee}
+                onUpdateEmployeeStatus={updateEmployeeStatus}
+                onDeleteEmployee={deleteEmployee}
+                onImportFromExcel={importFromExcel}
+                onAnalyzeEmployee={analyzeEmployeeWithAI}
+                tasks={tasks}
+                onDownloadReport={downloadReport}
+                playSound={playSound}
+              />
+            </TabsContent>
+            
+            <TabsContent value="tasks" className="mt-0">
+              <TaskManagement 
+                tasks={tasks}
+                employees={employees}
+                onUpdateTask={updateTaskStatus}
+                onDownloadReport={downloadReport}
+                playSound={playSound}
+              />
+            </TabsContent>
+          </Tabs>
         </main>
       </div>
     </div>
