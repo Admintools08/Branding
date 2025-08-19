@@ -1010,6 +1010,9 @@ Security Test User,SEC2024001,security.test@brandingpioneers.com,Security,Admin 
         self.test_jwt_token_validation()
         self.test_invalid_token_rejection()
         
+        # Specific User Management Tests (as requested)
+        self.run_specific_user_management_tests()
+        
         # User Invitation System Tests
         print("\n📧 User Invitation System Tests:")
         self.test_admin_invite_user()
