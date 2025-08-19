@@ -5,6 +5,9 @@ import sys
 import json
 from datetime import datetime, timezone
 import time
+import io
+import tempfile
+import os
 
 class HRSystemAPITester:
     def __init__(self, base_url="https://2307fe85-3f87-4e26-a9d7-6ad6750c69d8.preview.emergentagent.com"):
