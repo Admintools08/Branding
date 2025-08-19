@@ -494,25 +494,31 @@ const EmployeeManagement = ({ employees, onCreateEmployee, onUpdateEmployee, tas
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold text-gray-900">Employee Management</h2>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Employee
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Employee</DialogTitle>
-            </DialogHeader>
-            <AddEmployeeForm 
-              onSubmit={(data) => {
-                onCreateEmployee(data);
-                setIsAddDialogOpen(false);
-              }}
-            />
-          </DialogContent>
-        </Dialog>
+        <div className="flex space-x-3">
+          <Button variant="outline" onClick={() => onDownloadReport('employees')}>
+            <Download className="h-4 w-4 mr-2" />
+            Export PDF
+          </Button>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Employee
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Employee</DialogTitle>
+              </DialogHeader>
+              <AddEmployeeForm 
+                onSubmit={(data) => {
+                  onCreateEmployee(data);
+                  setIsAddDialogOpen(false);
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Search and Filter */}
