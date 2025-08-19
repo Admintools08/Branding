@@ -1469,6 +1469,7 @@ const EmployeeEditForm = ({ employee, onSubmit, onCancel }) => {
     </form>
   );
 };
+const AddEmployeeForm = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
     name: '',
     employee_id: '',
@@ -1646,6 +1647,21 @@ const EmployeeEditForm = ({ employee, onSubmit, onCancel }) => {
             required
           />
         </div>
+      </div>
+
+      <div>
+        <Label htmlFor="edit-status">Current Status</Label>
+        <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
+          <SelectTrigger className="border-purple-200">
+            <SelectValue placeholder="Select status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="onboarding">🚀 Onboarding</SelectItem>
+            <SelectItem value="active">⚡ Active</SelectItem>
+            <SelectItem value="exiting">👋 Exiting</SelectItem>
+            <SelectItem value="exited">🎓 Exited</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex space-x-3">
