@@ -1348,7 +1348,127 @@ const ExcelImportForm = ({ onSubmit }) => {
   );
 };
 
-const AddEmployeeForm = ({ onSubmit }) => {
+const EmployeeEditForm = ({ employee, onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState({
+    name: employee.name || '',
+    employee_id: employee.employee_id || '',
+    email: employee.email || '',
+    department: employee.department || '',
+    manager: employee.manager || '',
+    start_date: employee.start_date ? new Date(employee.start_date) : new Date(),
+    status: employee.status || 'active'
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="edit-name">Ninja Name *</Label>
+          <Input
+            id="edit-name"
+            value={formData.name}
+            onChange={(e) => setFormData({...formData, name: e.target.value})}
+            placeholder="e.g., Alex the Code Warrior"
+            className="border-purple-200 focus:border-purple-400"
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="edit-employee_id">Ninja ID *</Label>
+          <Input
+            id="edit-employee_id"
+            value={formData.employee_id}
+            onChange={(e) => setFormData({...formData, employee_id: e.target.value})}
+            placeholder="e.g., NIN001"
+            className="border-purple-200 focus:border-purple-400"
+            required
+          />
+        </div>
+      </div>
+      
+      <div>
+        <Label htmlFor="edit-email">Email Address *</Label>
+        <Input
+          id="edit-email"
+          type="email"
+          value={formData.email}
+          onChange={(e) => setFormData({...formData, email: e.target.value})}
+          placeholder="ninja@brandingpioneers.com"
+          className="border-purple-200 focus:border-purple-400"
+          required
+        />
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="edit-department">Department *</Label>
+          <Select value={formData.department} onValueChange={(value) => setFormData({...formData, department: value})}>
+            <SelectTrigger className="border-purple-200">
+              <SelectValue placeholder="Choose squad" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Engineering">🔧 Engineering</SelectItem>
+              <SelectItem value="Design">🎨 Design</SelectItem>
+              <SelectItem value="Marketing">📢 Marketing</SelectItem>
+              <SelectItem value="Sales">💼 Sales</SelectItem>
+              <SelectItem value="HR">👥 HR</SelectItem>
+              <SelectItem value="Finance">💰 Finance</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="edit-manager">Squad Leader *</Label>
+          <Input
+            id="edit-manager"
+            value={formData.manager}
+            onChange={(e) => setFormData({...formData, manager: e.target.value})}
+            placeholder="e.g., Senior Ninja Master"
+            className="border-purple-200 focus:border-purple-400"
+            required
+          />
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="edit-status">Current Status</Label>
+        <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
+          <SelectTrigger className="border-purple-200">
+            <SelectValue placeholder="Select status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="onboarding">🚀 Onboarding</SelectItem>
+            <SelectItem value="active">⚡ Active</SelectItem>
+            <SelectItem value="exiting">👋 Exiting</SelectItem>
+            <SelectItem value="exited">🎓 Exited</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex space-x-3">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel}
+          className="flex-1 border-gray-300 hover:bg-gray-50"
+        >
+          Cancel
+        </Button>
+        <Button 
+          type="submit" 
+          className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+        >
+          <Save className="w-4 h-4 mr-2" />
+          Update Profile
+        </Button>
+      </div>
+    </form>
+  );
+};
   const [formData, setFormData] = useState({
     name: '',
     employee_id: '',
