@@ -268,6 +268,119 @@ class HRSystemAPITester:
             f"Recent employees: {len(data.get('recent_employees', []))}, Recent tasks: {len(data.get('recent_tasks', []))}"
         )
 
+    def test_excel_import(self):
+        """Test Excel import functionality"""
+        # Create a simple CSV content for testing
+        csv_content = """Name,Employee ID,Email,Department,Manager,Start Date
+Alice Johnson,EMP2024001,alice.johnson@brandingpioneers.com,Engineering,John Smith,2024-01-15
+Bob Wilson,EMP2024002,bob.wilson@brandingpioneers.com,Marketing,Sarah Davis,2024-01-20"""
+        
+        # Create a temporary CSV file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
+            f.write(csv_content)
+            temp_file_path = f.name
+        
+        try:
+            # Prepare multipart form data
+            url = f"{self.api_url}/employees/import-excel"
+            headers = {}
+            if self.token:
+                headers['Authorization'] = f'Bearer {self.token}'
+            
+            with open(temp_file_path, 'rb') as f:
+                files = {'file': ('test_employees.csv', f, 'text/csv')}
+                response = requests.post(url, files=files, headers=headers, timeout=15)
+            
+            success = response.status_code == 200
+            try:
+                data = response.json()
+            except:
+                data = {"error": "Invalid JSON response"}
+            
+            # Check if employees were imported
+            if success and data.get('imported_count', 0) > 0:
+                # Try to get the imported employees to get their IDs
+                emp_success, emp_status, employees = self.make_request('GET', 'employees')
+                if emp_success and employees:
+                    # Find the imported employee
+                    for emp in employees:
+                        if emp.get('employee_id') == 'EMP2024001':
+                            self.excel_imported_employee_id = emp.get('id')
+                            break
+            
+            return self.log_test(
+                "Excel import functionality",
+                success and data.get('imported_count', 0) >= 2,
+                f"Imported {data.get('imported_count', 0)} employees, Errors: {len(data.get('errors', []))}"
+            )
+            
+        except Exception as e:
+            return self.log_test(
+                "Excel import functionality",
+                False,
+                f"Exception: {str(e)}"
+            )
+        finally:
+            # Clean up temporary file
+            try:
+                os.unlink(temp_file_path)
+            except:
+                pass
+
+    def test_delete_employee(self):
+        """Test employee deletion functionality"""
+        employee_to_delete = self.excel_imported_employee_id or self.created_employee_id
+        
+        if not employee_to_delete:
+            return self.log_test("Delete employee", False, "No employee ID available for deletion")
+        
+        success, status, data = self.make_request(
+            'DELETE',
+            f'employees/{employee_to_delete}',
+            expected_status=200
+        )
+        
+        # Verify employee is actually deleted
+        if success:
+            verify_success, verify_status, verify_data = self.make_request(
+                'GET',
+                f'employees/{employee_to_delete}',
+                expected_status=404
+            )
+            success = verify_success  # Should return 404 (not found)
+        
+        return self.log_test(
+            "Delete employee",
+            success,
+            f"Employee {employee_to_delete} deleted successfully" if success else f"Status: {status}, Data: {data}"
+        )
+
+    def test_pdf_reports(self):
+        """Test PDF report generation"""
+        # Test employee report
+        success, status, data = self.make_request(
+            'GET',
+            'reports/employees',
+            expected_status=200
+        )
+        
+        employee_report_success = success
+        
+        # Test tasks report
+        success, status, data = self.make_request(
+            'GET',
+            'reports/tasks',
+            expected_status=200
+        )
+        
+        tasks_report_success = success
+        
+        return self.log_test(
+            "PDF reports generation",
+            employee_report_success and tasks_report_success,
+            f"Employee report: {'✓' if employee_report_success else '✗'}, Tasks report: {'✓' if tasks_report_success else '✗'}"
+        )
+
     def run_all_tests(self):
         """Run all API tests in sequence"""
         print("🚀 Starting HR System API Tests")
