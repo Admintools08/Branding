@@ -588,12 +588,26 @@ const Sidebar = ({ currentView, onViewChange }) => (
   </aside>
 );
 
-const Dashboard = ({ stats, activities, employees, tasks, onUpdateTask }) => {
+const Dashboard = ({ stats, activities, employees, tasks, onUpdateTask, onGetAISuggestions, aiInsights, setAiInsights }) => {
+  const [loadingAI, setLoadingAI] = useState(false);
+
   const getProgressPercentage = (employeeId, taskType) => {
     const employeeTasks = tasks.filter(t => t.employee_id === employeeId && t.task_type === taskType);
     if (employeeTasks.length === 0) return 0;
     const completed = employeeTasks.filter(t => t.status === 'completed').length;
     return Math.round((completed / employeeTasks.length) * 100);
+  };
+
+  const handleGetAISuggestions = async () => {
+    setLoadingAI(true);
+    try {
+      const suggestions = await onGetAISuggestions();
+      setAiInsights(suggestions);
+    } catch (error) {
+      console.error('Failed to get AI suggestions:', error);
+    } finally {
+      setLoadingAI(false);
+    }
   };
 
   const getUpcomingReminders = () => {
