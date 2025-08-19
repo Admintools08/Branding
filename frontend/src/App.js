@@ -712,7 +712,12 @@ const EmployeeManagement = ({ employees, onCreateEmployee, onUpdateEmployee, onD
               <DialogHeader>
                 <DialogTitle>Import Team Members from Excel</DialogTitle>
               </DialogHeader>
-              <ExcelImportForm onSubmit={() => setIsExcelDialogOpen(false)} />
+              <ExcelImportForm 
+                onSubmit={(file) => {
+                  onImportFromExcel(file);
+                  setIsExcelDialogOpen(false);
+                }}
+              />
             </DialogContent>
           </Dialog>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
