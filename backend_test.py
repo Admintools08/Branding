@@ -383,9 +383,9 @@ Bob Wilson,EMP2024002,bob.wilson@brandingpioneers.com,Marketing,Sarah Davis,2024
 
     def run_all_tests(self):
         """Run all API tests in sequence"""
-        print("🚀 Starting HR System API Tests")
+        print("🚀 Starting Branding Pioneers (Digital Ninjas) HR System API Tests")
         print(f"📍 Testing against: {self.base_url}")
-        print("=" * 60)
+        print("=" * 70)
         
         # Authentication tests
         print("\n🔐 Authentication Tests:")
@@ -404,6 +404,10 @@ Bob Wilson,EMP2024002,bob.wilson@brandingpioneers.com,Marketing,Sarah Davis,2024
         self.test_create_employee()
         self.test_get_employee_by_id()
         
+        # New Excel import functionality
+        print("\n📋 Excel Import Tests:")
+        self.test_excel_import()
+        
         # Task management tests
         print("\n✅ Task Management Tests:")
         self.test_get_tasks_for_employee()
@@ -414,12 +418,20 @@ Bob Wilson,EMP2024002,bob.wilson@brandingpioneers.com,Marketing,Sarah Davis,2024
         self.test_update_employee_to_exiting()
         self.test_get_exit_tasks()
         
+        # New delete functionality
+        print("\n🗑️ Delete Functionality Tests:")
+        self.test_delete_employee()
+        
+        # PDF Reports tests
+        print("\n📄 PDF Reports Tests:")
+        self.test_pdf_reports()
+        
         # Final results
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 70)
         print(f"📈 Test Results: {self.tests_passed}/{self.tests_run} tests passed")
         
         if self.tests_passed == self.tests_run:
-            print("🎉 All tests passed! Backend API is working correctly.")
+            print("🎉 All tests passed! Branding Pioneers HR System API is working correctly!")
             return 0
         else:
             print(f"⚠️  {self.tests_run - self.tests_passed} tests failed. Please check the issues above.")
