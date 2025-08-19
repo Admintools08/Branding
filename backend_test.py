@@ -71,24 +71,24 @@ class HRSystemAPITester:
         )
 
     def test_login_valid_credentials(self):
-        """Test login with demo credentials"""
+        """Test login with new admin credentials"""
         success, status, data = self.make_request(
             'POST',
             'auth/login',
-            {"email": "admin@company.com", "password": "admin123"},
+            {"email": "omnathtripathi1@gmail.com", "password": "BrandingPioneers2024!"},
             expected_status=200
         )
         
         if success and 'access_token' in data:
             self.token = data['access_token']
             return self.log_test(
-                "Login with valid credentials",
+                "Login with new admin credentials",
                 True,
                 f"Token received, User: {data.get('user', {}).get('name', 'Unknown')}"
             )
         else:
             return self.log_test(
-                "Login with valid credentials",
+                "Login with new admin credentials",
                 False,
                 f"Status: {status}, Data: {data}"
             )
