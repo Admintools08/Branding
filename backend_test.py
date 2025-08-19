@@ -10,7 +10,7 @@ import tempfile
 import os
 
 class HRSystemAPITester:
-    def __init__(self, base_url="https://2307fe85-3f87-4e26-a9d7-6ad6750c69d8.preview.emergentagent.com"):
+    def __init__(self, base_url="https://analyse-it.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.token = None
