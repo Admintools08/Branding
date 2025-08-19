@@ -151,25 +151,68 @@ class ChecklistTemplate(BaseModel):
     default_due_days: Optional[int] = None
     is_active: bool = True
 
-# Default checklist templates
+# Default checklist templates - Updated comprehensive checklists
 DEFAULT_ONBOARDING_TASKS = [
+    # Pre-Onboarding (Before Day 1)
     {"title": "Offer letter shared & signed", "description": "Share and get signed offer letter from new employee", "default_due_days": 1},
-    {"title": "Employee details form submitted", "description": "Collect all required personal and professional details", "default_due_days": 3},
-    {"title": "Laptop/system allocation", "description": "Allocate laptop and necessary hardware to employee", "default_due_days": 5},
-    {"title": "Email & communication tools created", "description": "Create email account and setup communication tools", "default_due_days": 2},
-    {"title": "HRMS/project access setup", "description": "Provide access to HRMS and relevant project management tools", "default_due_days": 7},
-    {"title": "Welcome kit shared", "description": "Share welcome kit and company swag", "default_due_days": 5},
-    {"title": "Induction/training scheduled", "description": "Schedule orientation and initial training sessions", "default_due_days": 7}
+    {"title": "Appointment/contract letter shared", "description": "Share formal appointment/contract letter", "default_due_days": 1},
+    {"title": "Employee details form collected", "description": "Collect personal info, emergency contacts, bank details, etc.", "default_due_days": 3},
+    {"title": "Background verification initiated/completed", "description": "Complete background verification process", "default_due_days": 5},
+    {"title": "System/laptop allocation prepared", "description": "Prepare and allocate laptop and necessary hardware", "default_due_days": 5},
+    {"title": "Official email ID created", "description": "Create email account for new employee", "default_due_days": 2},
+    {"title": "Communication tools access created", "description": "Setup Slack/Teams/WhatsApp access", "default_due_days": 2},
+    {"title": "HRMS/Payroll/Project tools access created", "description": "Provide access to HRMS and project management tools", "default_due_days": 7},
+    {"title": "Drive folders, knowledge base access created", "description": "Setup access to shared drives and knowledge base", "default_due_days": 3},
+    {"title": "Welcome kit prepared", "description": "Prepare welcome kit and company swag", "default_due_days": 5},
+    
+    # Day 1
+    {"title": "Welcome & orientation session", "description": "Conduct welcome and orientation session", "default_due_days": 1},
+    {"title": "Company vision, mission, and values explained", "description": "Share company culture and values", "default_due_days": 1},
+    {"title": "HR policies & code of conduct shared", "description": "Share HR policies and code of conduct", "default_due_days": 1},
+    {"title": "IT setup completed", "description": "Complete system login, email, tools access testing", "default_due_days": 1},
+    {"title": "Introduction to reporting manager & team", "description": "Facilitate introduction to manager and team members", "default_due_days": 1},
+    {"title": "Role overview given by manager", "description": "Manager provides detailed role overview", "default_due_days": 1},
+    {"title": "Buddy/mentor assigned", "description": "Assign buddy or mentor for initial support", "default_due_days": 1},
+    
+    # First Week
+    {"title": "Departmental introduction sessions", "description": "Introduce to various departments", "default_due_days": 7},
+    {"title": "Training on core tools/software", "description": "Provide training on essential tools and software", "default_due_days": 7},
+    {"title": "Initial goal-setting with manager", "description": "Set initial goals and expectations with manager", "default_due_days": 7},
+    {"title": "Introduction to ongoing projects", "description": "Introduce to current projects and initiatives", "default_due_days": 7},
+    {"title": "Compliance training", "description": "Complete data security, workplace safety, compliance training", "default_due_days": 7},
+    
+    # First Month
+    {"title": "30-60-90 day goal review meeting", "description": "Conduct initial goal review and planning meeting", "default_due_days": 30},
+    {"title": "Regular manager check-ins scheduled", "description": "Setup regular check-in meetings with manager", "default_due_days": 30},
+    {"title": "Feedback session with HR", "description": "HR feedback session on settling in, challenges, improvements", "default_due_days": 30}
 ]
 
 DEFAULT_EXIT_TASKS = [
-    {"title": "Exit interview scheduled & completed", "description": "Conduct exit interview to gather feedback", "default_due_days": 7},
-    {"title": "Knowledge transfer session", "description": "Complete knowledge transfer to replacement or team", "default_due_days": 14},
-    {"title": "IT assets returned", "description": "Collect all company laptops, devices, and accessories", "default_due_days": 3},
-    {"title": "Email access disabled", "description": "Disable email and revoke system access", "default_due_days": 1},
-    {"title": "HR clearance completed", "description": "Complete HR clearance and documentation", "default_due_days": 5},
-    {"title": "Full & Final settlement initiated", "description": "Process final salary and settlements", "default_due_days": 10},
-    {"title": "Relieving letter issued", "description": "Issue relieving letter and experience certificate", "default_due_days": 7}
+    # Resignation/Separation Initiation
+    {"title": "Resignation letter received", "description": "Receive and acknowledge resignation letter", "default_due_days": 1},
+    {"title": "HR acknowledgement sent", "description": "Send HR acknowledgement of resignation", "default_due_days": 1},
+    {"title": "Exit interview scheduled", "description": "Schedule exit interview with HR", "default_due_days": 3},
+    {"title": "Manager notified", "description": "Notify reporting manager of resignation", "default_due_days": 1},
+    {"title": "Knowledge transfer plan created", "description": "Create comprehensive knowledge transfer plan", "default_due_days": 5},
+    
+    # During Notice Period
+    {"title": "Handover of tasks & responsibilities completed", "description": "Complete handover of all tasks and responsibilities", "default_due_days": 14},
+    {"title": "Documentation updated & shared", "description": "Update and share all relevant documentation", "default_due_days": 10},
+    {"title": "Client/project communications transitioned", "description": "Transition all client and project communications", "default_due_days": 10},
+    {"title": "Final feedback/exit survey filled", "description": "Complete final feedback and exit survey", "default_due_days": 7},
+    {"title": "No-dues clearance process initiated", "description": "Initiate no-dues clearance from all departments", "default_due_days": 7},
+    
+    # Last Working Day
+    {"title": "Company laptop, ID card, SIM, and assets returned", "description": "Collect all company assets and equipment", "default_due_days": 1},
+    {"title": "Access revoked", "description": "Disable email, tools, HRMS, drive, CRM access", "default_due_days": 1},
+    {"title": "Final payroll calculation initiated", "description": "Process leave encashment, gratuity, F&F calculation", "default_due_days": 1},
+    {"title": "HR conducts final exit interview", "description": "Conduct final exit interview session", "default_due_days": 1},
+    {"title": "Farewell/team communication sent", "description": "Send farewell communication to team", "default_due_days": 1},
+    
+    # Post Exit
+    {"title": "Relieving letter issued", "description": "Issue relieving letter to departing employee", "default_due_days": 7},
+    {"title": "Experience/service certificate shared", "description": "Share experience and service certificate", "default_due_days": 7},
+    {"title": "Final settlement processed", "description": "Process final salary settlement and payments", "default_due_days": 10}
 ]
 
 # Helper functions
