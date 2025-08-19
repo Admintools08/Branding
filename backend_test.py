@@ -741,6 +741,226 @@ Security Test User,SEC2024001,security.test@brandingpioneers.com,Security,Admin 
         )
 
     # ============================================================================
+    # SPECIFIC USER MANAGEMENT TESTS
+    # ============================================================================
+
+    def test_check_existing_users(self):
+        """Check existing users in the HR system database"""
+        if not self.token:
+            return self.log_test("Check existing users", False, "No admin token available")
+        
+        success, status, data = self.make_request(
+            'GET',
+            'admin/users',
+            expected_status=200
+        )
+        
+        if success and isinstance(data, list):
+            user_emails = [user.get('email', '') for user in data]
+            user_count = len(data)
+            
+            # Check if omnathtripathi1@gmail.com exists
+            target_email = 'omnathtripathi1@gmail.com'
+            user_exists = target_email in user_emails
+            
+            return self.log_test(
+                "Check existing users",
+                True,
+                f"Found {user_count} users. Target user '{target_email}' exists: {user_exists}. Users: {user_emails}"
+            )
+        else:
+            return self.log_test(
+                "Check existing users",
+                False,
+                f"Status: {status}, Data: {data}"
+            )
+
+    def test_create_specific_admin_user(self):
+        """Create specific admin user if not exists"""
+        if not self.token:
+            return self.log_test("Create specific admin user", False, "No admin token available")
+        
+        # First check if user exists
+        success, status, users_data = self.make_request(
+            'GET',
+            'admin/users',
+            expected_status=200
+        )
+        
+        target_email = 'omnathtripathi1@gmail.com'
+        user_exists = False
+        
+        if success and isinstance(users_data, list):
+            user_emails = [user.get('email', '') for user in users_data]
+            user_exists = target_email in user_emails
+        
+        if user_exists:
+            return self.log_test(
+                "Create specific admin user",
+                True,
+                f"User '{target_email}' already exists in the system"
+            )
+        
+        # User doesn't exist, try to create via invitation system
+        invite_data = {
+            "email": target_email,
+            "role": "super_admin",  # Admin role for full access
+            "message": "Welcome to the HR system! You have been granted admin access."
+        }
+        
+        success, status, data = self.make_request(
+            'POST',
+            'auth/invite-user',
+            invite_data,
+            expected_status=200
+        )
+        
+        if success and 'invitation_token' in data:
+            invitation_token = data['invitation_token']
+            
+            # Accept the invitation to create the user
+            accept_data = {
+                "name": "Omnath Tripathi",
+                "password": "HR@BPautomate"
+            }
+            
+            accept_success, accept_status, accept_data = self.make_request(
+                'POST',
+                f'auth/accept-invite?token={invitation_token}',
+                accept_data,
+                expected_status=200
+            )
+            
+            if accept_success:
+                return self.log_test(
+                    "Create specific admin user",
+                    True,
+                    f"Successfully created admin user '{target_email}' with full access"
+                )
+            else:
+                return self.log_test(
+                    "Create specific admin user",
+                    False,
+                    f"Failed to accept invitation. Status: {accept_status}, Data: {accept_data}"
+                )
+        else:
+            return self.log_test(
+                "Create specific admin user",
+                False,
+                f"Failed to send invitation. Status: {status}, Data: {data}"
+            )
+
+    def test_login_with_specific_credentials(self):
+        """Test login with the specific credentials"""
+        target_email = 'omnathtripathi1@gmail.com'
+        target_password = 'HR@BPautomate'
+        
+        success, status, data = self.make_request(
+            'POST',
+            'auth/login',
+            {"email": target_email, "password": target_password},
+            expected_status=200
+        )
+        
+        if success and 'access_token' in data:
+            user_info = data.get('user', {})
+            user_role = user_info.get('role', 'unknown')
+            user_name = user_info.get('name', 'unknown')
+            
+            return self.log_test(
+                "Login with specific credentials",
+                True,
+                f"Successfully logged in as {user_name} ({target_email}) with role: {user_role}"
+            )
+        else:
+            return self.log_test(
+                "Login with specific credentials",
+                False,
+                f"Login failed. Status: {status}, Data: {data}"
+            )
+
+    def test_verify_admin_access_features(self):
+        """Verify the user can access all HR system features"""
+        target_email = 'omnathtripathi1@gmail.com'
+        target_password = 'HR@BPautomate'
+        
+        # Login with the specific user
+        login_success, login_status, login_data = self.make_request(
+            'POST',
+            'auth/login',
+            {"email": target_email, "password": target_password},
+            expected_status=200
+        )
+        
+        if not login_success:
+            return self.log_test(
+                "Verify admin access features",
+                False,
+                f"Cannot login with target credentials. Status: {login_status}"
+            )
+        
+        # Save current token and use the new user's token
+        original_token = self.token
+        self.token = login_data['access_token']
+        
+        # Test access to various HR system features
+        test_results = []
+        
+        # Test 1: Access to users management
+        success1, status1, data1 = self.make_request('GET', 'admin/users', expected_status=200)
+        test_results.append(("Users Management", success1, status1))
+        
+        # Test 2: Access to employees
+        success2, status2, data2 = self.make_request('GET', 'employees', expected_status=200)
+        test_results.append(("Employee Management", success2, status2))
+        
+        # Test 3: Access to tasks
+        success3, status3, data3 = self.make_request('GET', 'tasks', expected_status=200)
+        test_results.append(("Task Management", success3, status3))
+        
+        # Test 4: Access to dashboard stats
+        success4, status4, data4 = self.make_request('GET', 'dashboard/stats', expected_status=200)
+        test_results.append(("Dashboard Stats", success4, status4))
+        
+        # Test 5: Access to audit logs
+        success5, status5, data5 = self.make_request('GET', 'admin/audit-logs', expected_status=200)
+        test_results.append(("Audit Logs", success5, status5))
+        
+        # Test 6: Access to AI features (if available)
+        success6, status6, data6 = self.make_request('GET', 'ai/task-suggestions', expected_status=200)
+        test_results.append(("AI Features", success6, status6))
+        
+        # Restore original token
+        self.token = original_token
+        
+        # Analyze results
+        successful_features = [result for result in test_results if result[1]]
+        failed_features = [result for result in test_results if not result[1]]
+        
+        all_features_accessible = len(failed_features) == 0
+        
+        feature_summary = f"Accessible: {[r[0] for r in successful_features]}, Failed: {[f'{r[0]}({r[2]})' for r in failed_features]}"
+        
+        return self.log_test(
+            "Verify admin access features",
+            all_features_accessible,
+            f"Admin access verification: {len(successful_features)}/{len(test_results)} features accessible. {feature_summary}"
+        )
+
+    def run_specific_user_management_tests(self):
+        """Run the specific user management tests requested"""
+        print("\n🎯 Specific User Management Tests:")
+        print("   Testing for user: omnathtripathi1@gmail.com")
+        print("   Password: HR@BPautomate")
+        print("   Role: admin (full access)")
+        print("-" * 60)
+        
+        self.test_check_existing_users()
+        self.test_create_specific_admin_user()
+        self.test_login_with_specific_credentials()
+        self.test_verify_admin_access_features()
+
+    # ============================================================================
     # CLEANUP TESTS
     # ============================================================================
 
