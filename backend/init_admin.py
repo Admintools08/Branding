@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script to create a demo admin user for the HR system
+Script to create the updated admin user for the HR system
 """
 import asyncio
 import os
@@ -19,29 +19,28 @@ async def create_admin_user():
     client = AsyncIOMotorClient(mongo_url)
     db = client[os.environ['DB_NAME']]
     
-    # Check if admin already exists
-    existing_admin = await db.users.find_one({"email": "admin@company.com"})
-    if existing_admin:
-        print("Admin user already exists!")
-        return
+    # Remove old admin if exists
+    await db.users.delete_many({"email": {"$in": ["admin@company.com", "omnathtripathi1@gmail.com"]}})
     
-    # Create admin user
-    password = "admin123"
+    # Create new admin user
+    password = "BrandingPioneers2024!"
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
     admin_user = {
-        "id": "admin-001",
-        "email": "admin@company.com",
-        "name": "System Administrator",
+        "id": "admin-branding-pioneers",
+        "email": "omnathtripathi1@gmail.com",
+        "name": "Omnath Tripathi",
         "role": "admin",
         "password": hashed_password,
         "created_at": "2024-01-01T00:00:00+00:00"
     }
     
     await db.users.insert_one(admin_user)
-    print("Demo admin user created successfully!")
-    print("Email: admin@company.com")
-    print("Password: admin123")
+    print("✅ New admin user created successfully!")
+    print("🚀 Company: Branding Pioneers (Digital Ninjas)")
+    print("📧 Email: omnathtripathi1@gmail.com")
+    print("🔑 Password: BrandingPioneers2024!")
+    print("🎯 Role: Super Admin with all permissions")
     
     client.close()
 

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 * {
   margin: 0;
@@ -12,7 +12,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f9fafb;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #111827;
   line-height: 1.6;
 }
@@ -21,45 +21,37 @@ body {
   min-height: 100vh;
 }
 
+/* Background Pattern */
+.bg-grid-pattern {
+  background-image: radial-gradient(circle, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: rgba(241, 245, 249, 0.5);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: linear-gradient(135deg, #7c3aed, #db2777);
 }
 
 /* Animation classes */
 .fade-in {
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.slide-up {
-  animation: slideUp 0.3s ease-out;
-}
-
-@keyframes slideUp {
   from {
     opacity: 0;
     transform: translateY(20px);
@@ -70,46 +62,117 @@ body {
   }
 }
 
+.slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bounce-in {
+  animation: bounceIn 0.6s ease-out;
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 /* Custom button hover effects */
 .btn-hover {
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s ease-in-out;
 }
 
 .btn-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
 }
 
 /* Card hover effects */
 .card-hover {
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s ease-in-out;
 }
 
 .card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Gradient backgrounds */
+.gradient-purple {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.gradient-pink {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+}
+
+.gradient-orange {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+}
+
+.gradient-green {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.gradient-blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
 }
 
 /* Progress bar custom styles */
 .progress-bar {
-  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
-  border-radius: 4px;
-  height: 8px;
+  background: linear-gradient(90deg, #8b5cf6 0%, #ec4899 100%);
+  border-radius: 6px;
+  height: 10px;
+  box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);
 }
 
-/* Custom badge styles */
-.badge-success {
+/* Achievement badges */
+.achievement-badge {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+}
+
+/* Status indicators with emojis */
+.status-onboarding {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.status-active {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
 }
 
-.badge-warning {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+.status-exiting {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
   color: white;
 }
 
-.badge-danger {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+.status-exited {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
   color: white;
 }
 
@@ -127,80 +190,156 @@ body {
   }
 }
 
-/* Form input focus effects */
+/* Pulse animation for notifications */
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Glassmorphism effects */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Fun hover effects for cards */
+.ninja-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.ninja-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(139, 92, 246, 0.15);
+}
+
+/* Achievement celebration animation */
+.celebration {
+  animation: celebrate 0.6s ease-out;
+}
+
+@keyframes celebrate {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2) rotate(5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Floating elements */
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Custom focus styles */
 .form-input:focus {
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  border-color: #8b5cf6;
+  outline: none;
 }
 
-/* Sidebar navigation active state */
-.nav-item-active {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-/* Dashboard stats cards */
-.stats-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1px solid #e2e8f0;
+/* Sidebar navigation with fun styles */
+.nav-item {
+  transition: all 0.3s ease;
   border-radius: 12px;
-  padding: 24px;
-  transition: all 0.2s ease-in-out;
+  position: relative;
+  overflow: hidden;
 }
 
-.stats-card:hover {
-  border-color: #10b981;
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.1);
+.nav-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  transition: width 0.3s ease;
+  z-index: -1;
 }
 
-/* Employee card styles */
-.employee-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 20px;
-  transition: all 0.2s ease-in-out;
+.nav-item.active::before,
+.nav-item:hover::before {
+  width: 100%;
 }
 
-.employee-card:hover {
-  border-color: #10b981;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+/* Fun milestone indicators */
+.milestone {
+  position: relative;
+  display: inline-block;
 }
 
-/* Task item styles */
-.task-item {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 16px;
-  transition: all 0.2s ease-in-out;
+.milestone::after {
+  content: '🎉';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 14px;
+  animation: bounce 2s infinite;
 }
 
-.task-item:hover {
-  border-color: #d1d5db;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
 }
 
-.task-item.completed {
-  opacity: 0.7;
-  background: #f9fafb;
+/* Task completion celebration */
+.task-completed {
+  animation: taskComplete 0.5s ease-out;
 }
 
-/* Responsive design */
+@keyframes taskComplete {
+  0% {
+    background-color: white;
+  }
+  50% {
+    background-color: #dcfce7;
+    transform: scale(1.05);
+  }
+  100% {
+    background-color: white;
+    transform: scale(1);
+  }
+}
+
+/* Responsive design improvements */
 @media (max-width: 768px) {
-  .App {
-    padding: 0;
-  }
-  
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-  }
-  
-  .main-content {
-    padding: 16px;
+  .ninja-card {
+    margin: 0 8px;
   }
   
   .stats-grid {
@@ -210,6 +349,12 @@ body {
   
   .employee-card {
     padding: 16px;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
   }
 }
 
@@ -226,52 +371,108 @@ body {
   body {
     font-size: 12px;
     line-height: 1.4;
-  }
-  
-  .page-break {
-    page-break-before: always;
+    background: white;
   }
 }
 
 /* Custom utilities */
-.glass-effect {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
 .gradient-text {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .shadow-soft {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.1);
 }
 
 .rounded-soft {
-  border-radius: 12px;
+  border-radius: 16px;
 }
 
-/* Status indicators */
-.status-active {
-  color: #059669;
-  background-color: #d1fae5;
+/* Fun loading states */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
 }
 
-.status-onboarding {
-  color: #1d4ed8;
-  background-color: #dbeafe;
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
-.status-exiting {
-  color: #d97706;
-  background-color: #fef3c7;
+/* Achievement progress indicators */
+.progress-ring {
+  transform: rotate(-90deg);
 }
 
-.status-exited {
-  color: #6b7280;
-  background-color: #f3f4f6;
+.progress-ring-circle {
+  stroke-dasharray: 251.2;
+  stroke-dashoffset: 251.2;
+  transition: stroke-dashoffset 0.5s ease-in-out;
+}
+
+/* Fun emoji reactions */
+.emoji-reaction {
+  display: inline-block;
+  animation: emojiFloat 2s ease-in-out infinite;
+  cursor: pointer;
+}
+
+@keyframes emojiFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(5deg);
+  }
+}
+
+.emoji-reaction:hover {
+  animation: emojiBounce 0.5s ease-in-out;
+}
+
+@keyframes emojiBounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+}
+
+/* Celebration confetti effect */
+.confetti {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #8b5cf6;
+  animation: confettiFall 3s linear infinite;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
 }
