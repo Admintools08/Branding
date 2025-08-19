@@ -637,11 +637,85 @@ const Dashboard = ({ stats, activities, employees, tasks, onUpdateTask, onGetAIS
           </h2>
           <p className="text-gray-600 mt-1">Your HR command center awaits!</p>
         </div>
-        <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-orange-100 to-yellow-100 rounded-full">
-          <Coffee className="h-5 w-5 text-orange-500" />
-          <span className="text-sm font-medium text-orange-700">Ready to ninja some HR tasks?</span>
+        <div className="flex items-center space-x-3">
+          <Button 
+            onClick={handleGetAISuggestions} 
+            disabled={loadingAI}
+            className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-lg"
+          >
+            {loadingAI ? (
+              <div className="flex items-center">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                AI Analyzing...
+              </div>
+            ) : (
+              <div className="flex items-center">
+                <Brain className="h-4 w-4 mr-2" />
+                Get AI Insights
+              </div>
+            )}
+          </Button>
+          <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-orange-100 to-yellow-100 rounded-full">
+            <Coffee className="h-5 w-5 text-orange-500" />
+            <span className="text-sm font-medium text-orange-700">Ready to ninja some HR tasks?</span>
+          </div>
         </div>
       </div>
+
+      {/* AI Insights Card */}
+      {aiInsights && aiInsights.success && (
+        <Card className="shadow-lg border-0 bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center text-blue-700">
+              <Sparkles className="h-5 w-5 mr-2 text-blue-500" />
+              AI Workspace Insights 🧠
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setAiInsights(null)}
+                className="ml-auto hover:bg-blue-100"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {aiInsights.suggestions && aiInsights.suggestions.workflow_efficiency && (
+                <div className="p-4 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm">
+                  <h4 className="font-semibold text-purple-700 mb-2 flex items-center">
+                    <Target className="h-4 w-4 mr-2" />
+                    Workflow Efficiency
+                  </h4>
+                  <p className="text-sm text-gray-700">
+                    {typeof aiInsights.suggestions.workflow_efficiency === 'string' 
+                      ? aiInsights.suggestions.workflow_efficiency 
+                      : 'AI analysis completed for workflow optimization'}
+                  </p>
+                </div>
+              )}
+              {aiInsights.suggestions && aiInsights.suggestions.automation_suggestions && (
+                <div className="p-4 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm">
+                  <h4 className="font-semibold text-green-700 mb-2 flex items-center">
+                    <Zap className="h-4 w-4 mr-2" />
+                    Automation Opportunities
+                  </h4>
+                  <p className="text-sm text-gray-700">
+                    {typeof aiInsights.suggestions.automation_suggestions === 'string'
+                      ? aiInsights.suggestions.automation_suggestions
+                      : 'Automation recommendations generated'}
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="mt-4 p-3 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Analysis Scope:</strong> {aiInsights.analysis_scope || 'Complete workforce analysis'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
