@@ -43,6 +43,13 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 app = FastAPI(title="HR Onboarding & Exit System")
 api_router = APIRouter(prefix="/api")
 
+# Initialize AI service
+try:
+    ai_service = HRAIService()
+except Exception as e:
+    print(f"Warning: AI service initialization failed: {e}")
+    ai_service = None
+
 # Security
 security = HTTPBearer()
 
