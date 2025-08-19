@@ -190,6 +190,7 @@ const App = () => {
               onCreateEmployee={createEmployee}
               onUpdateEmployee={updateEmployeeStatus}
               tasks={tasks}
+              onDownloadReport={downloadReport}
             />
           )}
           {currentView === 'tasks' && (
@@ -197,6 +198,7 @@ const App = () => {
               tasks={tasks}
               employees={employees}
               onUpdateTask={updateTaskStatus}
+              onDownloadReport={downloadReport}
             />
           )}
         </main>
