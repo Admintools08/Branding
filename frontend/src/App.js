@@ -1101,9 +1101,27 @@ const EmployeeManagement = ({ employees, onCreateEmployee, onUpdateEmployee, onU
                   </div>
                 </div>
                 <div className="flex flex-col space-y-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => handleEditEmployee(employee)}
+                    className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                  >
+                    <Edit className="h-3 w-3 mr-1" />
+                    Edit Profile
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => handleAnalyzeEmployee(employee.id)}
+                    className="border-purple-300 text-purple-600 hover:bg-purple-50"
+                  >
+                    <Brain className="h-3 w-3 mr-1" />
+                    AI Insights
+                  </Button>
                   <EmployeeActions 
                     employee={employee} 
-                    onUpdateStatus={onUpdateEmployee}
+                    onUpdateStatus={onUpdateEmployeeStatus}
                     onDelete={onDeleteEmployee}
                   />
                 </div>
