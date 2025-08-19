@@ -126,15 +126,22 @@ const App = () => {
     }
   };
 
-  const updateEmployeeStatus = async (employeeId, status, exitDate = null) => {
+  const downloadReport = async (reportType) => {
     try {
-      const updateData = { status };
-      if (exitDate) updateData.exit_date = exitDate;
+      const response = await axios.get(`${API}/reports/${reportType}`, {
+        responseType: 'blob',
+      });
       
-      await axios.put(`${API}/employees/${employeeId}`, updateData);
-      loadDashboardData();
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${reportType}_report.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error updating employee:', error);
+      console.error('Error downloading report:', error);
     }
   };
 
