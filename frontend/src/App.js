@@ -922,9 +922,12 @@ const Dashboard = ({ stats, activities, employees, tasks, onUpdateTask, onGetAIS
   );
 };
 
-const EmployeeManagement = ({ employees, onCreateEmployee, onUpdateEmployee, onDeleteEmployee, onImportFromExcel, tasks, onDownloadReport }) => {
+const EmployeeManagement = ({ employees, onCreateEmployee, onUpdateEmployee, onUpdateEmployeeStatus, onDeleteEmployee, onImportFromExcel, onAnalyzeEmployee, tasks, onDownloadReport, playSound }) => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isExcelDialogOpen, setIsExcelDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState(null);
+  const [aiAnalysis, setAiAnalysis] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -940,6 +943,22 @@ const EmployeeManagement = ({ employees, onCreateEmployee, onUpdateEmployee, onD
     if (employeeTasks.length === 0) return 0;
     const completed = employeeTasks.filter(t => t.status === 'completed').length;
     return Math.round((completed / employeeTasks.length) * 100);
+  };
+
+  const handleEditEmployee = (employee) => {
+    setEditingEmployee(employee);
+    setIsEditDialogOpen(true);
+    playSound('click');
+  };
+
+  const handleAnalyzeEmployee = async (employeeId) => {
+    try {
+      playSound('click');
+      const analysis = await onAnalyzeEmployee(employeeId);
+      setAiAnalysis(analysis);
+    } catch (error) {
+      console.error('AI analysis failed:', error);
+    }
   };
 
   return (
