@@ -126,6 +126,18 @@ const App = () => {
     }
   };
 
+  const updateEmployeeStatus = async (employeeId, status, exitDate = null) => {
+    try {
+      const updateData = { status };
+      if (exitDate) updateData.exit_date = exitDate;
+      
+      await axios.put(`${API}/employees/${employeeId}`, updateData);
+      loadDashboardData();
+    } catch (error) {
+      console.error('Error updating employee:', error);
+    }
+  };
+
   const downloadReport = async (reportType) => {
     try {
       const response = await axios.get(`${API}/reports/${reportType}`, {
