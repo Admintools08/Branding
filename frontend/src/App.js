@@ -500,6 +500,319 @@ const App = () => {
     </div>
   );
 
+  // Employee Management Component
+  const EmployeeManagement = ({ employees, onCreateEmployee, onUpdateEmployee, onUpdateEmployeeStatus, onDeleteEmployee, onImportFromExcel, onAnalyzeEmployee, tasks, onDownloadReport, playSound }) => {
+    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+    const [isExcelDialogOpen, setIsExcelDialogOpen] = useState(false);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [editingEmployee, setEditingEmployee] = useState(null);
+    const [aiAnalysis, setAiAnalysis] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+
+    const filteredEmployees = employees.filter(emp => {
+      const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           emp.employee_id.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || emp.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+
+    const getProgressPercentage = (employeeId, taskType) => {
+      const employeeTasks = tasks.filter(t => t.employee_id === employeeId && t.task_type === taskType);
+      if (employeeTasks.length === 0) return 0;
+      const completed = employeeTasks.filter(t => t.status === 'completed').length;
+      return Math.round((completed / employeeTasks.length) * 100);
+    };
+
+    const handleEditEmployee = (employee) => {
+      setEditingEmployee(employee);
+      setIsEditDialogOpen(true);
+      playSound('click');
+    };
+
+    const handleAnalyzeEmployee = async (employeeId) => {
+      try {
+        playSound('click');
+        const analysis = await onAnalyzeEmployee(employeeId);
+        setAiAnalysis(analysis);
+      } catch (error) {
+        console.error('AI analysis failed:', error);
+      }
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Team Ninja Management 🥷
+            </h2>
+            <p className="text-gray-600 mt-1">Manage your digital warriors</p>
+          </div>
+          <div className="flex space-x-3">
+            <Button variant="outline" onClick={() => onDownloadReport('employees')} className="hover:bg-purple-50">
+              <Download className="h-4 w-4 mr-2" />
+              Export Report
+            </Button>
+            <Button onClick={() => setIsExcelDialogOpen(true)} variant="outline" className="hover:bg-green-50">
+              <Upload className="h-4 w-4 mr-2" />
+              Import Excel
+            </Button>
+            <Button onClick={() => setIsAddDialogOpen(true)} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+              <UserPlus className="h-4 w-4 mr-2" />
+              Add Ninja
+            </Button>
+          </div>
+        </div>
+
+        {/* Search and Filter */}
+        <div className="flex space-x-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search ninjas by name or ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="onboarding">🚀 Onboarding</SelectItem>
+              <SelectItem value="active">✅ Active</SelectItem>
+              <SelectItem value="exiting">👋 Exiting</SelectItem>
+              <SelectItem value="exited">💼 Exited</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Employee Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredEmployees.map((employee) => (
+            <Card key={employee.id} className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-purple-500">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-lg">
+                        {employee.name.split(' ').map(n => n[0]).join('')}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">{employee.name}</h3>
+                      <p className="text-gray-600 text-sm">{employee.employee_id}</p>
+                    </div>
+                  </div>
+                  <Badge className={`${
+                    employee.status === 'active' ? 'bg-green-100 text-green-800' :
+                    employee.status === 'onboarding' ? 'bg-blue-100 text-blue-800' :
+                    employee.status === 'exiting' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {employee.status === 'onboarding' && '🚀'}
+                    {employee.status === 'active' && '✅'}
+                    {employee.status === 'exiting' && '👋'}
+                    {employee.status === 'exited' && '💼'}
+                    {' '}{employee.status}
+                  </Badge>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">Department:</span>
+                    <span className="font-medium">{employee.department}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">Position:</span>
+                    <span className="font-medium">{employee.position}</span>
+                  </div>
+                  
+                  {employee.status === 'onboarding' && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">Onboarding Progress:</span>
+                        <span className="font-medium">{getProgressPercentage(employee.id, 'onboarding')}%</span>
+                      </div>
+                      <Progress value={getProgressPercentage(employee.id, 'onboarding')} className="h-2" />
+                    </div>
+                  )}
+                  
+                  {employee.status === 'exiting' && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">Exit Progress:</span>
+                        <span className="font-medium">{getProgressPercentage(employee.id, 'exit')}%</span>
+                      </div>
+                      <Progress value={getProgressPercentage(employee.id, 'exit')} className="h-2" />
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex space-x-2 mt-4">
+                  <Button size="sm" variant="outline" onClick={() => handleEditEmployee(employee)}>
+                    <Edit className="h-3 w-3 mr-1" />
+                    Edit
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleAnalyzeEmployee(employee.id)}>
+                    <Brain className="h-3 w-3 mr-1" />
+                    AI Analyze
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {filteredEmployees.length === 0 && (
+          <div className="text-center py-12">
+            <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-600 mb-2">No ninjas found</h3>
+            <p className="text-gray-500">Try adjusting your search or filters</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Task Management Component  
+  const TaskManagement = ({ tasks, employees, onUpdateTask, onDownloadReport }) => {
+    const [filter, setFilter] = useState('all');
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredTasks = tasks.filter(task => {
+      const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesFilter = filter === 'all' || task.status === filter || task.task_type === filter;
+      return matchesSearch && matchesFilter;
+    });
+
+    const getEmployeeName = (employeeId) => {
+      const employee = employees.find(emp => emp.id === employeeId);
+      return employee ? employee.name : 'Unknown';
+    };
+
+    const groupedTasks = filteredTasks.reduce((acc, task) => {
+      const key = task.task_type;
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(task);
+      return acc;
+    }, {});
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Mission Control 🎯
+            </h2>
+            <p className="text-gray-600 mt-1">Track and manage ninja missions</p>
+          </div>
+          <Button variant="outline" onClick={() => onDownloadReport('tasks')} className="hover:bg-purple-50">
+            <Download className="h-4 w-4 mr-2" />
+            Export Tasks
+          </Button>
+        </div>
+
+        {/* Search and Filter */}
+        <div className="flex space-x-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search missions..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filter tasks" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Tasks</SelectItem>
+              <SelectItem value="pending">📋 Pending</SelectItem>
+              <SelectItem value="in_progress">⏳ In Progress</SelectItem>
+              <SelectItem value="completed">✅ Completed</SelectItem>
+              <SelectItem value="onboarding">🚀 Onboarding</SelectItem>
+              <SelectItem value="exit">👋 Exit</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Tasks by Type */}
+        {Object.keys(groupedTasks).map((taskType) => (
+          <Card key={taskType} className="overflow-hidden">
+            <CardHeader className={`pb-3 ${taskType === 'onboarding' ? 'bg-blue-50' : 'bg-yellow-50'}`}>
+              <CardTitle className="text-xl flex items-center gap-2">
+                {taskType === 'onboarding' ? '🚀' : '👋'}
+                {taskType === 'onboarding' ? 'Onboarding Missions' : 'Exit Missions'}
+                <Badge variant="secondary" className="ml-2">
+                  {groupedTasks[taskType].length}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="divide-y divide-gray-100">
+                {groupedTasks[taskType].map((task) => (
+                  <div key={task.id} className="p-4 hover:bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3">
+                          <Checkbox 
+                            checked={task.status === 'completed'}
+                            onCheckedChange={(checked) => 
+                              onUpdateTask(task.id, checked ? 'completed' : 'pending')
+                            }
+                          />
+                          <div>
+                            <h4 className={`font-medium ${task.status === 'completed' ? 'line-through text-gray-500' : ''}`}>
+                              {task.title}
+                            </h4>
+                            <p className="text-sm text-gray-600">
+                              Assigned to: {getEmployeeName(task.employee_id)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Badge className={`${
+                          task.status === 'completed' ? 'bg-green-100 text-green-800' :
+                          task.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {task.status === 'completed' && '✅'}
+                          {task.status === 'in_progress' && '⏳'}
+                          {task.status === 'pending' && '📋'}
+                          {' '}{task.status}
+                        </Badge>
+                        {task.due_date && (
+                          <span className="text-sm text-gray-500">
+                            Due: {new Date(task.due_date).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+
+        {filteredTasks.length === 0 && (
+          <div className="text-center py-12">
+            <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-600 mb-2">No missions found</h3>
+            <p className="text-gray-500">Try adjusting your search or filters</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Navigation Component
   const Navigation = () => (
     <div className="bg-white shadow-sm border-b border-gray-200">
