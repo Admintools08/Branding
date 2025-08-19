@@ -267,11 +267,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Authentication System"
-    - "Employee Management CRUD"
+    - "User Authentication UI"
     - "Dashboard Interface"
-    - "AI Integration Service"
-  stuck_tasks: []
+    - "Employee Management UI"
+  stuck_tasks:
+    - "User Authentication UI - login not working"
   test_all: true
   test_priority: "high_first"
 
