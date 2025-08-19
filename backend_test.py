@@ -17,6 +17,7 @@ class HRSystemAPITester:
         self.tests_run = 0
         self.tests_passed = 0
         self.created_employee_id = None
+        self.excel_imported_employee_id = None
 
     def log_test(self, name, success, details=""):
         """Log test results"""
