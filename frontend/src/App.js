@@ -630,10 +630,31 @@ const App = () => {
       <Navigation />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {currentView === 'dashboard' && <Dashboard />}
+        {currentView === 'employees' && (
+          <EmployeeManagement 
+            employees={employees}
+            onCreateEmployee={createEmployee}
+            onUpdateEmployee={updateEmployee}
+            onUpdateEmployeeStatus={updateEmployeeStatus}
+            onDeleteEmployee={deleteEmployee}
+            onImportFromExcel={importFromExcel}
+            onAnalyzeEmployee={analyzeEmployee}
+            tasks={tasks}
+            onDownloadReport={downloadReport}
+            playSound={playSound}
+          />
+        )}
+        {currentView === 'tasks' && (
+          <TaskManagement 
+            tasks={tasks}
+            employees={employees}
+            onUpdateTask={updateTaskStatus}
+            onDownloadReport={downloadReport}
+          />
+        )}
         {currentView === 'admin' && canAccessAdminPanel(user?.role) && (
           <AdminPanel user={user} token={token} />
         )}
-        {/* Add other views here - employees, tasks, etc. from original App.js */}
       </main>
 
       <ChangePasswordForm 
