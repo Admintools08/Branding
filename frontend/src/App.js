@@ -236,8 +236,12 @@ const App = () => {
   const updateTaskStatus = async (taskId, status) => {
     try {
       await axios.put(`${API}/tasks/${taskId}`, { status });
+      playSound(status === 'completed' ? 'success' : 'click');
+      toast.success(status === 'completed' ? '🏆 Task completed! Great job!' : '📝 Task updated');
       loadDashboardData();
     } catch (error) {
+      playSound('error');
+      toast.error('Failed to update task');
       console.error('Error updating task:', error);
     }
   };
@@ -248,8 +252,19 @@ const App = () => {
       if (exitDate) updateData.exit_date = exitDate;
       
       await axios.put(`${API}/employees/${employeeId}`, updateData);
+      playSound('success');
+      
+      const statusMessages = {
+        'active': '⚡ Employee activated! Welcome to the team!',
+        'exiting': '👋 Exit process initiated',
+        'exited': '🎓 Exit process completed'
+      };
+      
+      toast.success(statusMessages[status] || 'Status updated successfully');
       loadDashboardData();
     } catch (error) {
+      playSound('error');
+      toast.error('Failed to update employee status');
       console.error('Error updating employee:', error);
     }
   };
