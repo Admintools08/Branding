@@ -79,7 +79,7 @@ class HRSystemAPITester:
         success, status, data = self.make_request(
             'POST',
             'auth/login',
-            {"email": "omnathtripathi1@gmail.com", "password": "BrandingPioneers2024!"},
+            {"email": "admin@hrtest.com", "password": "TestPassword123!"},
             expected_status=200
         )
         
