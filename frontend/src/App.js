@@ -845,9 +845,11 @@ const EmployeeManagement = ({ employees, onCreateEmployee, onUpdateEmployee, onD
 const ExcelImportForm = ({ onSubmit }) => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
+    setResult(null);
   };
 
   const handleSubmit = async (e) => {
@@ -855,55 +857,137 @@ const ExcelImportForm = ({ onSubmit }) => {
     if (!file) return;
     
     setLoading(true);
-    // TODO: Implement Excel upload logic
-    setTimeout(() => {
+    try {
+      const importResult = await onSubmit(file);
+      setResult(importResult);
+      if (importResult.errors.length === 0) {
+        setTimeout(() => {
+          // Close dialog after showing success
+          setFile(null);
+          setResult(null);
+        }, 3000);
+      }
+    } catch (error) {
+      setResult({
+        message: error.message,
+        imported_count: 0,
+        total_rows: 0,
+        errors: [error.message]
+      });
+    } finally {
       setLoading(false);
-      onSubmit();
-    }, 2000);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="border-2 border-dashed border-purple-300 rounded-lg p-6 text-center">
-        <Upload className="h-12 w-12 mx-auto text-purple-400 mb-3" />
-        <Label htmlFor="excel-file" className="cursor-pointer">
-          <span className="text-purple-600 font-semibold">Click to upload</span> or drag and drop
-        </Label>
-        <Input
-          id="excel-file"
-          type="file"
-          accept=".xlsx,.xls,.csv"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-        <p className="text-xs text-gray-500 mt-2">Excel (.xlsx, .xls) or CSV files only</p>
-        {file && (
-          <p className="text-sm text-green-600 mt-2">✓ {file.name} selected</p>
-        )}
-      </div>
-      
-      <div className="bg-blue-50 p-4 rounded-lg">
-        <h4 className="font-semibold text-blue-900 mb-2">Expected Excel Format:</h4>
-        <div className="text-sm text-blue-800">
-          <p>Columns: Name | Employee ID | Email | Department | Manager | Start Date</p>
-          <p className="text-xs mt-1">Example: John Doe | EMP001 | john@company.com | Engineering | Jane Smith | 2024-01-15</p>
-        </div>
-      </div>
+    <div className="space-y-4">
+      {!result && (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="border-2 border-dashed border-purple-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors">
+            <Upload className="h-12 w-12 mx-auto text-purple-400 mb-3" />
+            <Label htmlFor="excel-file" className="cursor-pointer">
+              <span className="text-purple-600 font-semibold">Click to upload</span> or drag and drop
+            </Label>
+            <Input
+              id="excel-file"
+              type="file"
+              accept=".xlsx,.xls,.csv"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <p className="text-xs text-gray-500 mt-2">Excel (.xlsx, .xls) or CSV files only</p>
+            {file && (
+              <div className="mt-3 p-2 bg-green-50 rounded-md">
+                <p className="text-sm text-green-600 font-medium">✓ {file.name} selected</p>
+                <p className="text-xs text-green-500">Ready to import ninja data!</p>
+              </div>
+            )}
+          </div>
+          
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+            <h4 className="font-semibold text-blue-900 mb-2 flex items-center">
+              <FileText className="h-4 w-4 mr-2" />
+              Expected Excel Format:
+            </h4>
+            <div className="text-sm text-blue-800">
+              <p className="font-mono bg-white/50 p-2 rounded text-xs">
+                Name | Employee ID | Email | Department | Manager | Start Date
+              </p>
+              <p className="text-xs mt-2 text-blue-600">
+                📋 Example: John Doe | NIN001 | john@brandingpioneers.com | Engineering | Jane Smith | 2024-01-15
+              </p>
+            </div>
+          </div>
 
-      <Button type="submit" className="w-full" disabled={!file || loading}>
-        {loading ? (
-          <div className="flex items-center">
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-            Processing Excel...
+          <Button type="submit" className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600" disabled={!file || loading}>
+            {loading ? (
+              <div className="flex items-center">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                Processing Excel Magic...
+              </div>
+            ) : (
+              <div className="flex items-center">
+                <Upload className="w-4 h-4 mr-2" />
+                Import Digital Ninjas 🥷
+              </div>
+            )}
+          </Button>
+        </form>
+      )}
+
+      {result && (
+        <div className="space-y-4">
+          <div className={`p-4 rounded-lg ${result.errors.length === 0 ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'} border`}>
+            <div className="flex items-center mb-2">
+              {result.errors.length === 0 ? (
+                <Trophy className="h-5 w-5 text-green-500 mr-2" />
+              ) : (
+                <AlertTriangle className="h-5 w-5 text-yellow-500 mr-2" />
+              )}
+              <h4 className={`font-semibold ${result.errors.length === 0 ? 'text-green-900' : 'text-yellow-900'}`}>
+                Import Results
+              </h4>
+            </div>
+            <p className={`text-sm ${result.errors.length === 0 ? 'text-green-800' : 'text-yellow-800'}`}>
+              {result.message}
+            </p>
+            <div className="mt-2 text-xs">
+              <span className="inline-block bg-white/50 px-2 py-1 rounded mr-2">
+                ✅ Imported: {result.imported_count}
+              </span>
+              <span className="inline-block bg-white/50 px-2 py-1 rounded">
+                📊 Total: {result.total_rows}
+              </span>
+            </div>
           </div>
-        ) : (
-          <div className="flex items-center">
-            <Upload className="w-4 h-4 mr-2" />
-            Import Ninjas
-          </div>
-        )}
-      </Button>
-    </form>
+
+          {result.errors.length > 0 && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <h5 className="font-semibold text-red-900 mb-2 flex items-center">
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                Issues Found:
+              </h5>
+              <div className="max-h-32 overflow-y-auto">
+                {result.errors.map((error, index) => (
+                  <p key={index} className="text-xs text-red-700 mb-1">• {error}</p>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <Button 
+            onClick={() => {
+              setResult(null);
+              setFile(null);
+            }}
+            className="w-full"
+            variant="outline"
+          >
+            Import More Ninjas
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };
 
