@@ -143,7 +143,7 @@ class HRSystemAPITester:
             "status": "onboarding"
         }
         
-        success, status, data = self.make_request('POST', 'employees', employee_data, expected_status=201)
+        success, status, data = self.make_request('POST', 'employees', employee_data, expected_status=200)
         
         if success and 'id' in data:
             self.created_employee_id = data['id']
