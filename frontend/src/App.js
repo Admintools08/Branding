@@ -729,6 +729,10 @@ const TaskManagement = ({ tasks, employees, onUpdateTask, onDownloadReport }) =>
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold text-gray-900">Task Management</h2>
+        <Button variant="outline" onClick={() => onDownloadReport('tasks')}>
+          <FileText className="h-4 w-4 mr-2" />
+          Export Tasks PDF
+        </Button>
       </div>
 
       {/* Search and Filter */}
