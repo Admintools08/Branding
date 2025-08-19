@@ -1130,6 +1130,71 @@ const EmployeeManagement = ({ employees, onCreateEmployee, onUpdateEmployee, onU
           </Card>
         ))}
       </div>
+
+      {/* Employee Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Employee Profile ✏️</DialogTitle>
+          </DialogHeader>
+          {editingEmployee && (
+            <EmployeeEditForm 
+              employee={editingEmployee}
+              onSubmit={async (data) => {
+                try {
+                  await onUpdateEmployee(editingEmployee.id, data);
+                  setIsEditDialogOpen(false);
+                  setEditingEmployee(null);
+                } catch (error) {
+                  console.error('Update failed:', error);
+                }
+              }}
+              onCancel={() => {
+                setIsEditDialogOpen(false);
+                setEditingEmployee(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Analysis Results */}
+      {aiAnalysis && aiAnalysis.success && (
+        <Card className="mt-6 shadow-lg border-0 bg-gradient-to-br from-purple-50 to-blue-50">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center text-purple-700">
+              <Brain className="h-5 w-5 mr-2" />
+              AI Employee Analysis 🧠
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setAiAnalysis(null)}
+                className="ml-auto hover:bg-purple-100"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {aiAnalysis.insights && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.entries(aiAnalysis.insights).map(([key, value]) => (
+                    <div key={key} className="p-4 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm">
+                      <h4 className="font-semibold text-purple-700 mb-2 capitalize">
+                        {key.replace(/_/g, ' ')}
+                      </h4>
+                      <p className="text-sm text-gray-700">
+                        {typeof value === 'string' ? value : JSON.stringify(value)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
