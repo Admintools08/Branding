@@ -420,6 +420,264 @@ async def get_recent_activities(current_user: User = Depends(get_current_user)):
         "recent_tasks": [Task(**parse_from_mongo(task)) for task in recent_tasks]
     }
 
+def generate_employee_report_pdf(employees, reports_data):
+    """Generate PDF report for employees"""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
+    
+    # Container for the 'Flowable' objects
+    elements = []
+    
+    # Define styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        spaceAfter=30,
+        textColor=colors.HexColor('#1f2937'),
+        alignment=TA_CENTER
+    )
+    
+    heading_style = ParagraphStyle(
+        'CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=16,
+        spaceAfter=12,
+        textColor=colors.HexColor('#374151')
+    )
+    
+    # Title
+    title = Paragraph("HR Employee Report", title_style)
+    elements.append(title)
+    elements.append(Spacer(1, 20))
+    
+    # Report date
+    date_para = Paragraph(f"Generated on: {datetime.now().strftime('%B %d, %Y')}", styles['Normal'])
+    elements.append(date_para)
+    elements.append(Spacer(1, 20))
+    
+    # Summary Statistics
+    elements.append(Paragraph("Employee Summary", heading_style))
+    summary_data = [
+        ['Status', 'Count'],
+        ['Total Employees', str(len(employees))],
+        ['Active', str(len([e for e in employees if e.get('status') == 'active']))],
+        ['Onboarding', str(len([e for e in employees if e.get('status') == 'onboarding']))],
+        ['Exiting', str(len([e for e in employees if e.get('status') == 'exiting']))],
+        ['Exited', str(len([e for e in employees if e.get('status') == 'exited']))]
+    ]
+    
+    summary_table = Table(summary_data, colWidths=[3*inch, 1*inch])
+    summary_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#10b981')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    
+    elements.append(summary_table)
+    elements.append(Spacer(1, 30))
+    
+    # Employee Details
+    elements.append(Paragraph("Employee Details", heading_style))
+    
+    # Employee table headers
+    employee_data = [['Name', 'ID', 'Department', 'Status', 'Start Date']]
+    
+    for emp in employees:
+        start_date = emp.get('start_date', '')
+        if isinstance(start_date, str) and 'T' in start_date:
+            try:
+                start_date = datetime.fromisoformat(start_date.replace('Z', '+00:00')).strftime('%Y-%m-%d')
+            except:
+                pass
+        
+        employee_data.append([
+            emp.get('name', ''),
+            emp.get('employee_id', ''),
+            emp.get('department', ''),
+            emp.get('status', '').capitalize(),
+            str(start_date)
+        ])
+    
+    employee_table = Table(employee_data, colWidths=[1.5*inch, 1*inch, 1.5*inch, 1*inch, 1*inch])
+    employee_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#10b981')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTSIZE', (0, 1), (-1, -1), 9)
+    ]))
+    
+    elements.append(employee_table)
+    
+    # Build PDF
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer
+
+@api_router.get("/reports/employees")
+async def export_employees_report(current_user: User = Depends(get_current_user)):
+    """Export employee report as PDF"""
+    # Get all employees
+    employees = await db.employees.find().to_list(1000)
+    
+    # Get additional report data
+    reports_data = {
+        "generated_by": current_user.name,
+        "generated_at": datetime.now(timezone.utc)
+    }
+    
+    # Generate PDF
+    pdf_buffer = generate_employee_report_pdf(employees, reports_data)
+    
+    # Return PDF response
+    return Response(
+        content=pdf_buffer.read(),
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=employee_report.pdf"}
+    )
+
+def generate_tasks_report_pdf(tasks, employees):
+    """Generate PDF report for tasks"""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
+    
+    elements = []
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        spaceAfter=30,
+        textColor=colors.HexColor('#1f2937'),
+        alignment=TA_CENTER
+    )
+    
+    heading_style = ParagraphStyle(
+        'CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=16,
+        spaceAfter=12,
+        textColor=colors.HexColor('#374151')
+    )
+    
+    # Title
+    title = Paragraph("HR Tasks Report", title_style)
+    elements.append(title)
+    elements.append(Spacer(1, 20))
+    
+    # Report date
+    date_para = Paragraph(f"Generated on: {datetime.now().strftime('%B %d, %Y')}", styles['Normal'])
+    elements.append(date_para)
+    elements.append(Spacer(1, 20))
+    
+    # Task Summary
+    elements.append(Paragraph("Task Summary", heading_style))
+    
+    total_tasks = len(tasks)
+    completed_tasks = len([t for t in tasks if t.get('status') == 'completed'])
+    pending_tasks = len([t for t in tasks if t.get('status') == 'pending'])
+    onboarding_tasks = len([t for t in tasks if t.get('task_type') == 'onboarding'])
+    exit_tasks = len([t for t in tasks if t.get('task_type') == 'exit'])
+    
+    summary_data = [
+        ['Metric', 'Count'],
+        ['Total Tasks', str(total_tasks)],
+        ['Completed Tasks', str(completed_tasks)],
+        ['Pending Tasks', str(pending_tasks)],
+        ['Onboarding Tasks', str(onboarding_tasks)],
+        ['Exit Tasks', str(exit_tasks)]
+    ]
+    
+    summary_table = Table(summary_data, colWidths=[3*inch, 1*inch])
+    summary_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#10b981')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    
+    elements.append(summary_table)
+    elements.append(Spacer(1, 30))
+    
+    # Task Details
+    elements.append(Paragraph("Task Details", heading_style))
+    
+    # Create employee lookup
+    employee_lookup = {emp.get('id'): emp.get('name', 'Unknown') for emp in employees}
+    
+    # Task table
+    task_data = [['Task', 'Employee', 'Type', 'Status', 'Due Date']]
+    
+    for task in tasks:
+        due_date = task.get('due_date', '')
+        if isinstance(due_date, str) and 'T' in due_date:
+            try:
+                due_date = datetime.fromisoformat(due_date.replace('Z', '+00:00')).strftime('%Y-%m-%d')
+            except:
+                pass
+        
+        employee_name = employee_lookup.get(task.get('employee_id', ''), 'Unknown')
+        
+        task_data.append([
+            task.get('title', '')[:30] + ('...' if len(task.get('title', '')) > 30 else ''),
+            employee_name[:20],
+            task.get('task_type', '').capitalize(),
+            task.get('status', '').capitalize(),
+            str(due_date) if due_date else 'N/A'
+        ])
+    
+    task_table = Table(task_data, colWidths=[2*inch, 1.2*inch, 1*inch, 1*inch, 1*inch])
+    task_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#10b981')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTSIZE', (0, 1), (-1, -1), 8)
+    ]))
+    
+    elements.append(task_table)
+    
+    # Build PDF
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer
+
+@api_router.get("/reports/tasks")
+async def export_tasks_report(current_user: User = Depends(get_current_user)):
+    """Export tasks report as PDF"""
+    # Get all tasks and employees
+    tasks = await db.tasks.find().to_list(1000)
+    employees = await db.employees.find().to_list(1000)
+    
+    # Generate PDF
+    pdf_buffer = generate_tasks_report_pdf(tasks, employees)
+    
+    # Return PDF response
+    return Response(
+        content=pdf_buffer.read(),
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=tasks_report.pdf"}
+    )
+
 # Include router
 app.include_router(api_router)
 
