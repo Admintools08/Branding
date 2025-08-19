@@ -329,6 +329,97 @@ async def update_employee(employee_id: str, update_data: EmployeeUpdate, current
     updated_employee = await db.employees.find_one({"id": employee_id})
     return Employee(**parse_from_mongo(updated_employee))
 
+@api_router.delete("/employees/{employee_id}")
+async def delete_employee(employee_id: str, current_user: User = Depends(get_current_user)):
+    employee = await db.employees.find_one({"id": employee_id})
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    # Delete associated tasks
+    await db.tasks.delete_many({"employee_id": employee_id})
+    
+    # Delete employee
+    await db.employees.delete_one({"id": employee_id})
+    
+    return {"message": f"Employee {employee['name']} and associated tasks deleted successfully"}
+
+@api_router.post("/employees/import-excel")
+async def import_employees_from_excel(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
+    if not file.filename.endswith(('.xlsx', '.xls', '.csv')):
+        raise HTTPException(status_code=400, detail="Please upload an Excel (.xlsx, .xls) or CSV file")
+    
+    try:
+        # Read file content
+        content = await file.read()
+        
+        # Parse Excel/CSV file
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(io.BytesIO(content))
+        else:
+            df = pd.read_excel(io.BytesIO(content))
+        
+        # Validate required columns
+        required_columns = ['Name', 'Employee ID', 'Email', 'Department', 'Manager', 'Start Date']
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        
+        if missing_columns:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Missing required columns: {', '.join(missing_columns)}"
+            )
+        
+        imported_count = 0
+        errors = []
+        
+        for index, row in df.iterrows():
+            try:
+                # Check if employee ID already exists
+                existing = await db.employees.find_one({"employee_id": str(row['Employee ID'])})
+                if existing:
+                    errors.append(f"Row {index + 2}: Employee ID {row['Employee ID']} already exists")
+                    continue
+                
+                # Parse start date
+                start_date = pd.to_datetime(row['Start Date']).to_pydatetime()
+                if start_date.tzinfo is None:
+                    start_date = start_date.replace(tzinfo=timezone.utc)
+                
+                # Create employee object
+                employee = Employee(
+                    name=str(row['Name']).strip(),
+                    employee_id=str(row['Employee ID']).strip(),
+                    email=str(row['Email']).strip().lower(),
+                    department=str(row['Department']).strip(),
+                    manager=str(row['Manager']).strip(),
+                    start_date=start_date,
+                    status=EmployeeStatus.ONBOARDING
+                )
+                
+                # Save to database
+                employee_dict = prepare_for_mongo(employee.dict())
+                await db.employees.insert_one(employee_dict)
+                
+                # Create default onboarding tasks
+                await create_default_tasks_for_employee(employee.id, TaskType.ONBOARDING, current_user.email)
+                
+                imported_count += 1
+                
+            except Exception as e:
+                errors.append(f"Row {index + 2}: {str(e)}")
+                continue
+        
+        result = {
+            "message": f"Successfully imported {imported_count} employees",
+            "imported_count": imported_count,
+            "total_rows": len(df),
+            "errors": errors
+        }
+        
+        return result
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error processing file: {str(e)}")
+
 # Task routes
 @api_router.post("/tasks", response_model=Task)
 async def create_task(task_data: TaskCreate, current_user: User = Depends(get_current_user)):
