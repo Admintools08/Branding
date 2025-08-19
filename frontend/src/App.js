@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from './components/ui/button';
@@ -14,6 +14,7 @@ import { Textarea } from './components/ui/textarea';
 import { Calendar } from './components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from './components/ui/popover';
 import { Checkbox } from './components/ui/checkbox';
+import { Toaster, toast } from 'sonner';
 import { 
   Users, 
   UserPlus, 
@@ -40,7 +41,12 @@ import {
   PartyPopper,
   Bell,
   Coffee,
-  Rocket
+  Rocket,
+  Brain,
+  Sparkles,
+  Save,
+  X,
+  Volume2
 } from 'lucide-react';
 import './App.css';
 
