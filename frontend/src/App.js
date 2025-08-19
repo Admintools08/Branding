@@ -715,7 +715,7 @@ const EmployeeActions = ({ employee, onUpdateStatus }) => (
   </div>
 );
 
-const TaskManagement = ({ tasks, employees, onUpdateTask }) => {
+const TaskManagement = ({ tasks, employees, onUpdateTask, onDownloadReport }) => {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
