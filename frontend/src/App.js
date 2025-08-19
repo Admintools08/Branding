@@ -148,22 +148,21 @@ const App = () => {
     }
   };
 
-  const downloadReport = async (reportType) => {
+  const importFromExcel = async (file) => {
     try {
-      const response = await axios.get(`${API}/reports/${reportType}`, {
-        responseType: 'blob',
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await axios.post(`${API}/employees/import-excel`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
       
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `${reportType}_report.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      loadDashboardData();
+      return response.data;
     } catch (error) {
-      console.error('Error downloading report:', error);
+      throw new Error(error.response?.data?.detail || 'Failed to import from Excel');
     }
   };
 
