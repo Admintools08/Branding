@@ -230,6 +230,7 @@ const App = () => {
               onCreateEmployee={createEmployee}
               onUpdateEmployee={updateEmployeeStatus}
               onDeleteEmployee={deleteEmployee}
+              onImportFromExcel={importFromExcel}
               tasks={tasks}
               onDownloadReport={downloadReport}
             />
