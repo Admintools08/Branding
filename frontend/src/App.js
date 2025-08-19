@@ -61,6 +61,56 @@ const App = () => {
   const [dashboardStats, setDashboardStats] = useState({});
   const [recentActivities, setRecentActivities] = useState({});
   const [currentView, setCurrentView] = useState('dashboard');
+  const [aiInsights, setAiInsights] = useState(null);
+  const audioContextRef = useRef(null);
+
+  // Sound effects
+  const playSound = (type = 'click') => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    
+    const ctx = audioContextRef.current;
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    // Different sounds for different actions
+    switch (type) {
+      case 'success':
+        oscillator.frequency.setValueAtTime(800, ctx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.3);
+        break;
+      case 'error':
+        oscillator.frequency.setValueAtTime(300, ctx.currentTime);
+        gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.5);
+        break;
+      case 'notification':
+        oscillator.frequency.setValueAtTime(600, ctx.currentTime);
+        oscillator.frequency.setValueAtTime(800, ctx.currentTime + 0.1);
+        oscillator.frequency.setValueAtTime(600, ctx.currentTime + 0.2);
+        gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.3);
+        break;
+      default: // click
+        oscillator.frequency.setValueAtTime(1000, ctx.currentTime);
+        gainNode.gain.setValueAtTime(0.05, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.1);
+    }
+  };
 
   // Authentication
   useEffect(() => {
