@@ -667,7 +667,7 @@ const Dashboard = ({ stats, activities, employees, tasks, onUpdateTask }) => {
   );
 };
 
-const EmployeeManagement = ({ employees, onCreateEmployee, onUpdateEmployee, onDeleteEmployee, tasks, onDownloadReport }) => {
+const EmployeeManagement = ({ employees, onCreateEmployee, onUpdateEmployee, onDeleteEmployee, onImportFromExcel, tasks, onDownloadReport }) => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isExcelDialogOpen, setIsExcelDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
