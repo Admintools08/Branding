@@ -28,7 +28,9 @@ import {
   Filter,
   Plus,
   Edit,
-  Trash2
+  Trash2,
+  Download,
+  FileText
 } from 'lucide-react';
 import './App.css';
 
