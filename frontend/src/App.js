@@ -299,9 +299,13 @@ const App = () => {
         },
       });
       
+      playSound('success');
+      toast.success('📊 Excel imported successfully with AI analysis!');
       loadDashboardData();
       return response.data;
     } catch (error) {
+      playSound('error');
+      toast.error('Import failed: ' + (error.response?.data?.detail || error.message));
       throw new Error(error.response?.data?.detail || 'Failed to import from Excel');
     }
   };
@@ -309,8 +313,12 @@ const App = () => {
   const deleteEmployee = async (employeeId) => {
     try {
       await axios.delete(`${API}/employees/${employeeId}`);
+      playSound('notification');
+      toast.success('🗑️ Employee removed from team');
       loadDashboardData();
     } catch (error) {
+      playSound('error');
+      toast.error('Failed to delete employee');
       console.error('Error deleting employee:', error);
     }
   };
