@@ -402,20 +402,36 @@ async def import_employees_from_excel(file: UploadFile = File(...), current_user
         raise HTTPException(status_code=400, detail="Please upload an Excel (.xlsx, .xls) or CSV file")
     
     try:
-        # Read file content
+        # Save uploaded file temporarily for AI analysis
+        temp_dir = tempfile.mkdtemp()
+        temp_file_path = os.path.join(temp_dir, file.filename)
+        
+        # Read and save file content
         content = await file.read()
+        with open(temp_file_path, 'wb') as temp_file:
+            temp_file.write(content)
+        
+        # AI Analysis of the Excel file
+        ai_analysis = None
+        if ai_service:
+            try:
+                ai_analysis = await ai_service.analyze_excel_file(temp_file_path, "excel")
+            except Exception as e:
+                print(f"AI analysis failed: {e}")
         
         # Parse Excel/CSV file
         if file.filename.endswith('.csv'):
-            df = pd.read_csv(io.BytesIO(content))
+            df = pd.read_csv(temp_file_path)
         else:
-            df = pd.read_excel(io.BytesIO(content))
+            df = pd.read_excel(temp_file_path)
         
         # Validate required columns
         required_columns = ['Name', 'Employee ID', 'Email', 'Department', 'Manager', 'Start Date']
         missing_columns = [col for col in required_columns if col not in df.columns]
         
         if missing_columns:
+            # Clean up temp file
+            shutil.rmtree(temp_dir)
             raise HTTPException(
                 status_code=400, 
                 detail=f"Missing required columns: {', '.join(missing_columns)}"
@@ -461,17 +477,138 @@ async def import_employees_from_excel(file: UploadFile = File(...), current_user
                 errors.append(f"Row {index + 2}: {str(e)}")
                 continue
         
+        # Clean up temp file
+        shutil.rmtree(temp_dir)
+        
         result = {
             "message": f"Successfully imported {imported_count} employees",
             "imported_count": imported_count,
             "total_rows": len(df),
-            "errors": errors
+            "errors": errors,
+            "ai_analysis": ai_analysis  # Include AI insights
         }
         
         return result
         
     except Exception as e:
+        # Clean up temp file if it exists
+        if 'temp_dir' in locals():
+            shutil.rmtree(temp_dir, ignore_errors=True)
         raise HTTPException(status_code=400, detail=f"Error processing file: {str(e)}")
+
+# AI Endpoints
+@api_router.post("/ai/analyze-employee")
+async def analyze_employee_with_ai(employee_id: str, current_user: User = Depends(get_current_user)):
+    """Generate AI insights for a specific employee"""
+    if not ai_service:
+        raise HTTPException(status_code=503, detail="AI service not available")
+    
+    # Get employee data
+    employee = await db.employees.find_one({"id": employee_id})
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    # Get employee tasks
+    tasks = await db.tasks.find({"employee_id": employee_id}).to_list(100)
+    
+    # Generate AI insights
+    try:
+        insights = await ai_service.generate_employee_insights(employee, tasks)
+        return insights
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI analysis failed: {str(e)}")
+
+@api_router.post("/ai/validate-employee")
+async def validate_employee_data(employee_data: dict, current_user: User = Depends(get_current_user)):
+    """AI-powered validation of employee data"""
+    if not ai_service:
+        raise HTTPException(status_code=503, detail="AI service not available")
+    
+    try:
+        validation = await ai_service.validate_employee_data(employee_data)
+        return validation
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI validation failed: {str(e)}")
+
+@api_router.get("/ai/task-suggestions")
+async def get_ai_task_suggestions(current_user: User = Depends(get_current_user)):
+    """Get AI-powered task and workflow suggestions"""
+    if not ai_service:
+        raise HTTPException(status_code=503, detail="AI service not available")
+    
+    # Get current tasks and employees for analysis
+    tasks = await db.tasks.find().to_list(1000)
+    employees = await db.employees.find().to_list(1000)
+    
+    try:
+        suggestions = await ai_service.suggest_task_improvements(tasks, employees)
+        return suggestions
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI suggestions failed: {str(e)}")
+
+# Enhanced Employee Profile Editing
+@api_router.put("/employees/{employee_id}/profile", response_model=Employee)
+async def update_employee_profile(employee_id: str, update_data: dict, current_user: User = Depends(get_current_user)):
+    """Enhanced employee profile update with AI validation"""
+    employee = await db.employees.find_one({"id": employee_id})
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    # AI validation of updated data if available
+    validation_result = None
+    if ai_service:
+        try:
+            merged_data = {**employee, **update_data}
+            validation_result = await ai_service.validate_employee_data(merged_data)
+        except Exception as e:
+            print(f"AI validation warning: {e}")
+    
+    # Prepare update data
+    update_dict = {}
+    allowed_fields = ['name', 'employee_id', 'email', 'department', 'manager', 'start_date', 'exit_date', 'status']
+    
+    for field, value in update_data.items():
+        if field in allowed_fields and value is not None:
+            # Handle date fields
+            if field in ['start_date', 'exit_date'] and isinstance(value, str):
+                try:
+                    value = datetime.fromisoformat(value.replace('Z', '+00:00'))
+                except:
+                    raise HTTPException(status_code=400, detail=f"Invalid date format for {field}")
+            update_dict[field] = value
+    
+    # Check for employee_id uniqueness if being updated
+    if 'employee_id' in update_dict and update_dict['employee_id'] != employee.get('employee_id'):
+        existing = await db.employees.find_one({"employee_id": update_dict['employee_id'], "id": {"$ne": employee_id}})
+        if existing:
+            raise HTTPException(status_code=400, detail="Employee ID already exists")
+    
+    # Update timestamp
+    update_dict["updated_at"] = datetime.now(timezone.utc)
+    update_dict = prepare_for_mongo(update_dict)
+    
+    # Handle status changes for task creation
+    old_status = employee.get('status')
+    new_status = update_dict.get('status', old_status)
+    
+    # Create exit tasks if status is changing to exiting
+    if new_status == EmployeeStatus.EXITING and old_status != EmployeeStatus.EXITING:
+        await create_default_tasks_for_employee(employee_id, TaskType.EXIT, current_user.email)
+    
+    # Update employee
+    await db.employees.update_one({"id": employee_id}, {"$set": update_dict})
+    
+    # Get updated employee
+    updated_employee = await db.employees.find_one({"id": employee_id})
+    result = Employee(**parse_from_mongo(updated_employee))
+    
+    # Add AI validation results to response if available
+    if validation_result:
+        result_dict = result.dict()
+        result_dict["ai_validation"] = validation_result
+        return result_dict
+    
+    return result
 
 # Task routes
 @api_router.post("/tasks", response_model=Task)
