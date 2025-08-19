@@ -176,11 +176,9 @@ if __name__ == "__main__":
     print("🚀 Initializing HR System Database...")
     asyncio.run(init_super_admin())
     
-    # Optionally create sample data
-    response = input("\n📊 Would you like to create sample data for demonstration? (y/n): ")
-    if response.lower() in ['y', 'yes']:
-        print("Creating sample data...")
-        asyncio.run(create_sample_data())
+    # Automatically create sample data for demonstration
+    print("Creating sample data...")
+    asyncio.run(create_sample_data())
     
     print("\n🎉 Database initialization complete!")
     print("\n🔗 Access your HR system at: https://analyze-fix.preview.emergentagent.com")
