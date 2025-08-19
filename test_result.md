@@ -195,6 +195,18 @@ backend:
           agent: "testing"
           comment: "✅ PDF report generation working - both employee and task reports generating successfully with proper formatting, statistics, and data presentation. Fixed Pillow dependency issue"
 
+  - task: "Specific User Management - omnathtripathi1@gmail.com"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Successfully created and verified admin user 'omnathtripathi1@gmail.com' with password 'HR@BPautomate' and super_admin role. User can login successfully and has full access to all HR system features: Users Management, Employee Management, Task Management, Dashboard Stats, Recent Activities, and Audit Logs. Fixed missing dependencies (litellm, python-http-client) during testing. System ready for production use with requested admin user configured."
+
 frontend:
   - task: "User Authentication UI"
     implemented: true
