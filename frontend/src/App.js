@@ -249,6 +249,151 @@ const App = () => {
     return ['super_admin', 'admin', 'hr_manager'].includes(userRole);
   };
 
+  // Employee management functions
+  const createEmployee = async (employeeData) => {
+    try {
+      await axios.post(`${API}/employees`, employeeData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      playSound('success');
+      toast.success('🚀 New ninja added to the team!');
+      loadData();
+    } catch (error) {
+      playSound('error');
+      toast.error('Failed to create employee: ' + (error.response?.data?.detail || error.message));
+      throw new Error(error.response?.data?.detail || 'Failed to create employee');
+    }
+  };
+
+  const updateEmployee = async (employeeId, updateData) => {
+    try {
+      const response = await axios.put(`${API}/employees/${employeeId}/profile`, updateData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      playSound('success');
+      toast.success('✨ Employee profile updated successfully!');
+      loadData();
+      return response.data;
+    } catch (error) {
+      playSound('error');
+      toast.error('Failed to update employee: ' + (error.response?.data?.detail || error.message));
+      throw new Error(error.response?.data?.detail || 'Failed to update employee');
+    }
+  };
+
+  const updateEmployeeStatus = async (employeeId, status, exitDate = null) => {
+    try {
+      const updateData = { status };
+      if (exitDate) updateData.exit_date = exitDate;
+      
+      await axios.put(`${API}/employees/${employeeId}`, updateData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      playSound('success');
+      toast.success(`🎯 Employee status updated to ${status}!`);
+      loadData();
+    } catch (error) {
+      playSound('error');
+      toast.error('Failed to update employee status: ' + (error.response?.data?.detail || error.message));
+      throw new Error(error.response?.data?.detail || 'Failed to update status');
+    }
+  };
+
+  const deleteEmployee = async (employeeId) => {
+    try {
+      await axios.delete(`${API}/employees/${employeeId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      playSound('success');
+      toast.success('Employee removed from team');
+      loadData();
+    } catch (error) {
+      playSound('error');
+      toast.error('Failed to delete employee: ' + (error.response?.data?.detail || error.message));
+      throw new Error(error.response?.data?.detail || 'Failed to delete employee');
+    }
+  };
+
+  const importFromExcel = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await axios.post(`${API}/employees/import-excel`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+      
+      playSound('success');
+      toast.success(`📊 Successfully imported ${response.data.created_count} employees!`);
+      loadData();
+      return response.data;
+    } catch (error) {
+      playSound('error');
+      toast.error('Import failed: ' + (error.response?.data?.detail || error.message));
+      throw new Error(error.response?.data?.detail || 'Import failed');
+    }
+  };
+
+  const analyzeEmployee = async (employeeId) => {
+    try {
+      const response = await axios.post(`${API}/ai/analyze-employee`, {
+        employee_id: employeeId
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      playSound('notification');
+      toast.success('🧠 AI analysis completed!');
+      return response.data;
+    } catch (error) {
+      playSound('error');
+      toast.error('AI analysis failed: ' + (error.response?.data?.detail || error.message));
+      throw new Error(error.response?.data?.detail || 'AI analysis failed');
+    }
+  };
+
+  const updateTaskStatus = async (taskId, status) => {
+    try {
+      await axios.put(`${API}/tasks/${taskId}`, { status }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      playSound(status === 'completed' ? 'success' : 'click');
+      toast.success(status === 'completed' ? '🏆 Task completed! Great job!' : '📝 Task updated');
+      loadData();
+    } catch (error) {
+      playSound('error');
+      toast.error('Failed to update task');
+      console.error('Error updating task:', error);
+    }
+  };
+
+  const downloadReport = async (type) => {
+    try {
+      const response = await axios.get(`${API}/reports/${type}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+      });
+      
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${type}-report-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      playSound('success');
+      toast.success('📄 Report downloaded successfully!');
+    } catch (error) {
+      playSound('error');
+      toast.error('Failed to download report: ' + (error.response?.data?.detail || error.message));
+    }
+  };
+
   // Login Component
   const LoginForm = () => (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4">
