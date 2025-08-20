@@ -500,6 +500,393 @@ const App = () => {
     </div>
   );
 
+  // Add Employee Form Component
+  const AddEmployeeForm = ({ onSubmit, onCancel }) => {
+    const [formData, setFormData] = useState({
+      name: '',
+      email: '',
+      employee_id: '',
+      department: '',
+      position: '',
+      start_date: new Date().toISOString().split('T')[0],
+      phone: '',
+      emergency_contact: '',
+      status: 'onboarding'
+    });
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setLoading(true);
+      try {
+        await onSubmit(formData);
+        playSound('success');
+      } catch (error) {
+        playSound('error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return (
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Full Name *</Label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              placeholder="John Doe"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="employee_id">Employee ID *</Label>
+            <Input
+              id="employee_id"
+              value={formData.employee_id}
+              onChange={(e) => setFormData({...formData, employee_id: e.target.value})}
+              placeholder="EMP001"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="email">Email Address *</Label>
+          <Input
+            id="email"
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData({...formData, email: e.target.value})}
+            placeholder="john.doe@company.com"
+            required
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="department">Department *</Label>
+            <Input
+              id="department"
+              value={formData.department}
+              onChange={(e) => setFormData({...formData, department: e.target.value})}
+              placeholder="Engineering"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="position">Position *</Label>
+            <Input
+              id="position"
+              value={formData.position}
+              onChange={(e) => setFormData({...formData, position: e.target.value})}
+              placeholder="Software Developer"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="start_date">Start Date *</Label>
+            <Input
+              id="start_date"
+              type="date"
+              value={formData.start_date}
+              onChange={(e) => setFormData({...formData, start_date: e.target.value})}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phone">Phone Number</Label>
+            <Input
+              id="phone"
+              value={formData.phone}
+              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+              placeholder="+1 (555) 123-4567"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="emergency_contact">Emergency Contact</Label>
+          <Input
+            id="emergency_contact"
+            value={formData.emergency_contact}
+            onChange={(e) => setFormData({...formData, emergency_contact: e.target.value})}
+            placeholder="Jane Doe - +1 (555) 987-6543"
+          />
+        </div>
+
+        <div className="flex justify-end space-x-3 pt-4">
+          <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={loading} className="bg-gradient-to-r from-purple-600 to-pink-600">
+            {loading ? (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Adding Ninja...
+              </div>
+            ) : (
+              <div className="flex items-center">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Add Ninja
+              </div>
+            )}
+          </Button>
+        </div>
+      </form>
+    );
+  };
+
+  // Excel Import Form Component
+  const ExcelImportForm = ({ onSubmit, onCancel }) => {
+    const [file, setFile] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (!file) return;
+      
+      setLoading(true);
+      try {
+        await onSubmit(file);
+        playSound('success');
+      } catch (error) {
+        playSound('error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return (
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="excel-file">Select Excel File</Label>
+          <Input
+            id="excel-file"
+            type="file"
+            accept=".xlsx,.xls,.csv"
+            onChange={(e) => setFile(e.target.files[0])}
+            required
+          />
+          <p className="text-sm text-gray-500">
+            Supports .xlsx, .xls, and .csv files. Make sure your file has columns: name, email, employee_id, department, position
+          </p>
+        </div>
+
+        <div className="flex justify-end space-x-3 pt-4">
+          <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={loading || !file} className="bg-gradient-to-r from-green-600 to-blue-600">
+            {loading ? (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Importing...
+              </div>
+            ) : (
+              <div className="flex items-center">
+                <Upload className="w-4 h-4 mr-2" />
+                Import Ninjas
+              </div>
+            )}
+          </Button>
+        </div>
+      </form>
+    );
+  };
+
+  // Edit Employee Form Component  
+  const EditEmployeeForm = ({ employee, onSubmit, onCancel, onUpdateStatus, onDelete }) => {
+    const [formData, setFormData] = useState({
+      name: employee.name || '',
+      email: employee.email || '',
+      employee_id: employee.employee_id || '',
+      department: employee.department || '',
+      position: employee.position || '',
+      phone: employee.phone || '',
+      emergency_contact: employee.emergency_contact || ''
+    });
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setLoading(true);
+      try {
+        await onSubmit(formData);
+        playSound('success');
+      } catch (error) {
+        playSound('error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const handleStatusChange = async (newStatus) => {
+      try {
+        await onUpdateStatus(employee.id, newStatus);
+        playSound('success');
+      } catch (error) {
+        playSound('error');
+      }
+    };
+
+    const handleDelete = async () => {
+      if (window.confirm('Are you sure you want to remove this ninja from the team? This action cannot be undone.')) {
+        try {
+          await onDelete(employee.id);
+          playSound('success');
+        } catch (error) {
+          playSound('error');
+        }
+      }
+    };
+
+    return (
+      <div className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Full Name *</Label>
+              <Input
+                id="edit-name"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-employee_id">Employee ID *</Label>
+              <Input
+                id="edit-employee_id"
+                value={formData.employee_id}
+                onChange={(e) => setFormData({...formData, employee_id: e.target.value})}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="edit-email">Email Address *</Label>
+            <Input
+              id="edit-email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-department">Department *</Label>
+              <Input
+                id="edit-department"
+                value={formData.department}
+                onChange={(e) => setFormData({...formData, department: e.target.value})}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-position">Position *</Label>
+              <Input
+                id="edit-position"
+                value={formData.position}
+                onChange={(e) => setFormData({...formData, position: e.target.value})}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-phone">Phone Number</Label>
+              <Input
+                id="edit-phone"
+                value={formData.phone}
+                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Current Status</Label>
+              <Badge className={`${
+                employee.status === 'active' ? 'bg-green-100 text-green-800' :
+                employee.status === 'onboarding' ? 'bg-blue-100 text-blue-800' :
+                employee.status === 'exiting' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-gray-100 text-gray-800'
+              }`}>
+                {employee.status === 'onboarding' && '🚀'}
+                {employee.status === 'active' && '✅'}
+                {employee.status === 'exiting' && '👋'}
+                {employee.status === 'exited' && '💼'}
+                {' '}{employee.status}
+              </Badge>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="edit-emergency_contact">Emergency Contact</Label>
+            <Input
+              id="edit-emergency_contact"
+              value={formData.emergency_contact}
+              onChange={(e) => setFormData({...formData, emergency_contact: e.target.value})}
+            />
+          </div>
+
+          <div className="flex justify-between pt-4">
+            <div className="space-x-2">
+              <Button type="button" variant="outline" size="sm" 
+                onClick={() => handleStatusChange('onboarding')}
+                disabled={employee.status === 'onboarding'}
+              >
+                🚀 Onboarding
+              </Button>
+              <Button type="button" variant="outline" size="sm"
+                onClick={() => handleStatusChange('active')}
+                disabled={employee.status === 'active'}
+              >
+                ✅ Active
+              </Button>
+              <Button type="button" variant="outline" size="sm"
+                onClick={() => handleStatusChange('exiting')}
+                disabled={employee.status === 'exiting'}
+              >
+                👋 Exiting
+              </Button>
+            </div>
+            <Button type="button" variant="destructive" size="sm" onClick={handleDelete}>
+              <Trash2 className="w-4 h-4 mr-1" />
+              Delete
+            </Button>
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-4 border-t">
+            <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Updating...
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <Save className="w-4 h-4 mr-2" />
+                  Update Ninja
+                </div>
+              )}
+            </Button>
+          </div>
+        </form>
+      </div>
+    );
+  };
+
   // Employee Management Component
   const EmployeeManagement = ({ employees, onCreateEmployee, onUpdateEmployee, onUpdateEmployeeStatus, onDeleteEmployee, onImportFromExcel, onAnalyzeEmployee, tasks, onDownloadReport, playSound }) => {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
