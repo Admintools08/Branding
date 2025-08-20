@@ -621,6 +621,16 @@ const App = () => {
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
+            <Label htmlFor="birthday">Birthday</Label>
+            <Input
+              id="birthday"
+              type="date"
+              value={formData.birthday}
+              onChange={(e) => setFormData({...formData, birthday: e.target.value})}
+              placeholder="Optional"
+            />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="phone">Phone Number</Label>
             <Input
               id="phone"
@@ -629,6 +639,9 @@ const App = () => {
               placeholder="+1 (555) 123-4567"
             />
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4">
           <div className="space-y-2">
             <Label htmlFor="emergency_contact">Emergency Contact</Label>
             <Input
