@@ -674,6 +674,117 @@ const App = () => {
             <p className="text-gray-500">Try adjusting your search or filters</p>
           </div>
         )}
+
+        {/* Add Employee Dialog */}
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogContent className="sm:max-w-[525px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-purple-600" />
+                Add New Ninja to the Team
+              </DialogTitle>
+            </DialogHeader>
+            <AddEmployeeForm 
+              onSubmit={async (data) => {
+                try {
+                  await onCreateEmployee(data);
+                  setIsAddDialogOpen(false);
+                } catch (error) {
+                  // Error is already handled in the onCreateEmployee function
+                }
+              }}
+              onCancel={() => setIsAddDialogOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
+
+        {/* Excel Import Dialog */}
+        <Dialog open={isExcelDialogOpen} onOpenChange={setIsExcelDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-green-600" />
+                Import Ninjas from Excel
+              </DialogTitle>
+            </DialogHeader>
+            <ExcelImportForm 
+              onSubmit={async (file) => {
+                try {
+                  await onImportFromExcel(file);
+                  setIsExcelDialogOpen(false);
+                } catch (error) {
+                  // Error is already handled in the onImportFromExcel function
+                }
+              }}
+              onCancel={() => setIsExcelDialogOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Employee Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="sm:max-w-[525px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-blue-600" />
+                Edit Ninja Profile
+              </DialogTitle>
+            </DialogHeader>
+            {editingEmployee && (
+              <EditEmployeeForm 
+                employee={editingEmployee}
+                onSubmit={async (data) => {
+                  try {
+                    await onUpdateEmployee(editingEmployee.id, data);
+                    setIsEditDialogOpen(false);
+                    setEditingEmployee(null);
+                  } catch (error) {
+                    // Error is already handled in the onUpdateEmployee function
+                  }
+                }}
+                onCancel={() => {
+                  setIsEditDialogOpen(false);
+                  setEditingEmployee(null);
+                }}
+                onUpdateStatus={onUpdateEmployeeStatus}
+                onDelete={onDeleteEmployee}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* AI Analysis Dialog */}
+        {aiAnalysis && (
+          <Dialog open={!!aiAnalysis} onOpenChange={() => setAiAnalysis(null)}>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-purple-600" />
+                  AI Ninja Analysis
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-purple-900 mb-2">Analysis Results</h4>
+                  <pre className="text-sm text-purple-800 whitespace-pre-wrap">{aiAnalysis.analysis}</pre>
+                </div>
+                {aiAnalysis.suggestions && (
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-2">Suggestions</h4>
+                    <ul className="text-sm text-blue-800 space-y-1">
+                      {aiAnalysis.suggestions.map((suggestion, index) => (
+                        <li key={index}>• {suggestion}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <div className="flex justify-end">
+                  <Button onClick={() => setAiAnalysis(null)}>Close</Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     );
   };
