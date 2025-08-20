@@ -145,9 +145,12 @@ class EmployeeCreate(BaseModel):
 
 class EmployeeUpdate(BaseModel):
     name: Optional[str] = None
+    employee_id: Optional[str] = None
+    email: Optional[EmailStr] = None
     department: Optional[str] = None
     manager: Optional[str] = None
     status: Optional[EmployeeStatus] = None
+    start_date: Optional[datetime] = None
     exit_date: Optional[datetime] = None
 
 class Task(BaseModel):
