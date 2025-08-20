@@ -835,12 +835,14 @@ const App = () => {
                 employee.status === 'active' ? 'bg-green-100 text-green-800' :
                 employee.status === 'onboarding' ? 'bg-blue-100 text-blue-800' :
                 employee.status === 'exiting' ? 'bg-yellow-100 text-yellow-800' :
+                employee.status === 'inactive' ? 'bg-red-100 text-red-800' :
                 'bg-gray-100 text-gray-800'
               }`}>
                 {employee.status === 'onboarding' && '🚀'}
                 {employee.status === 'active' && '✅'}
                 {employee.status === 'exiting' && '👋'}
                 {employee.status === 'exited' && '💼'}
+                {employee.status === 'inactive' && '⏸️'}
                 {' '}{employee.status}
               </Badge>
             </div>
