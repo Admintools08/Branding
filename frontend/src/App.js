@@ -1586,7 +1586,12 @@ const App = () => {
                     <div className="flex-1">
                       <p className="font-semibold text-gray-900">{event.employee?.name}</p>
                       <p className="text-sm text-gray-600">
-                        {event.type === 'birthday' ? 'Birthday' : `${event.years_of_service} Year Anniversary`}
+                        {event.type === 'birthday' 
+                          ? 'Birthday' 
+                          : event.years_of_service === 0 
+                            ? 'Joining Date Anniversary' 
+                            : `${event.years_of_service} Year Anniversary`
+                        }
                       </p>
                     </div>
                     <div className="text-right">
