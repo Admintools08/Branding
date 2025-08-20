@@ -107,15 +107,18 @@ user_problem_statement: "Fix profile-related issues: 1. 0 Year Anniversary shoul
 backend:
   - task: "Profile Fields Fix - Position and Phone"
     implemented: true
-    working: false
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: false
           agent: "main" 
           comment: "Added position and phone fields to Employee, EmployeeCreate, and EmployeeUpdate models. Updated valid_fields in profile update endpoint to include 'position' and 'phone'. Backend models now properly accept these fields."
+        - working: true
+          agent: "testing"
+          comment: "✅ POSITION AND PHONE FIELD TESTING COMPLETED - All 10/10 tests passed successfully! ✅ Employee Creation with Position/Phone (2/2): Created employees with position and phone fields, verified data persistence and retrieval. ✅ Profile Update Endpoint Testing (3/3): PUT /api/employees/{employee_id}/profile endpoint working perfectly with position and phone updates, empty strings, and null values. ✅ Data Model Validation (2/2): Employee, EmployeeCreate, and EmployeeUpdate models properly handle position and phone fields as optional fields. ✅ Edge Cases (2/2): Empty strings and null values handled correctly for both position and phone fields. ✅ Data Persistence (1/1): Position and phone data persists correctly in database across multiple operations. The user-reported issue 'Position and phone number isn't being saved in the profile' has been completely resolved. All backend functionality for position and phone fields is working correctly."
 
 frontend:
   - task: "Emergency Contact Field Removal"
