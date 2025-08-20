@@ -707,6 +707,19 @@ async def update_employee(
         raise HTTPException(status_code=404, detail="Employee not found")
     
     update_dict = {k: v for k, v in update_data.dict().items() if v is not None}
+    
+    # Check for email uniqueness if being updated
+    if 'email' in update_dict and update_dict['email'] != employee.get('email'):
+        existing_email = await db.employees.find_one({"email": update_dict['email'], "id": {"$ne": employee_id}})
+        if existing_email:
+            raise HTTPException(status_code=400, detail="Email already exists")
+    
+    # Check for employee_id uniqueness if being updated
+    if 'employee_id' in update_dict and update_dict['employee_id'] != employee.get('employee_id'):
+        existing_emp_id = await db.employees.find_one({"employee_id": update_dict['employee_id'], "id": {"$ne": employee_id}})
+        if existing_emp_id:
+            raise HTTPException(status_code=400, detail="Employee ID already exists")
+    
     update_dict["updated_at"] = datetime.now(timezone.utc)
     update_dict = prepare_for_mongo(update_dict)
     
