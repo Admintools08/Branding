@@ -1591,7 +1591,7 @@ const App = () => {
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-blue-500" />
+              <CalendarIcon className="w-5 h-5 text-blue-500" />
               Upcoming Events
             </CardTitle>
           </CardHeader>
