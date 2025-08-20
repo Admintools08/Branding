@@ -739,7 +739,6 @@ const App = () => {
       department: employee.department || '',
       position: employee.position || '',
       phone: employee.phone || '',
-      emergency_contact: employee.emergency_contact || '',
       birthday: employee.birthday ? new Date(employee.birthday).toISOString().split('T')[0] : ''
     });
     const [loading, setLoading] = useState(false);
