@@ -102,7 +102,45 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Complete functionality testing and verification of all features" - User wants comprehensive testing of the Dynamic HR Onboarding & Exit Management System after implementing all fixes and improvements
+user_problem_statement: "Fix profile-related issues: 1. 0 Year Anniversary should show joining date, 2. Position and phone number not being saved in profile, 3. Remove emergency number field as it's not required"
+
+backend:
+  - task: "Profile Fields Fix - Position and Phone"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "main" 
+          comment: "Added position and phone fields to Employee, EmployeeCreate, and EmployeeUpdate models. Updated valid_fields in profile update endpoint to include 'position' and 'phone'. Backend models now properly accept these fields."
+
+frontend:
+  - task: "Emergency Contact Field Removal"
+    implemented: true
+    working: false
+    file: "App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "main"
+          comment: "Removed emergency_contact field from both AddEmployeeForm and EditEmployeeForm components. Field removed from form state initialization and UI components."
+          
+  - task: "Anniversary Display Fix - 0 Year Issue"
+    implemented: true
+    working: false
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "main"
+          comment: "Fixed anniversary display logic to show 'Joining Date Anniversary' when years_of_service is 0, instead of '0 Year Anniversary'. Updated the conditional logic in upcoming events display."
 
 backend:
   - task: "Authentication System"
