@@ -850,6 +850,18 @@ const App = () => {
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="edit-birthday">Birthday</Label>
+              <Input
+                id="edit-birthday"
+                type="date"
+                value={formData.birthday}
+                onChange={(e) => setFormData({...formData, birthday: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-2">
               <Label>Current Status</Label>
               <Badge className={`${
                 employee.status === 'active' ? 'bg-green-100 text-green-800' :
