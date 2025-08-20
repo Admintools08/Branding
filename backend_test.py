@@ -78,15 +78,24 @@ class HRSystemEnhancedSecurityTester:
 
     def test_login_with_admin_user(self):
         """Test login with the new admin user credentials"""
-        # First try the expected admin user
+        # First try the test admin user from test_result.md
         success, status, data = self.make_request(
             'POST',
             'auth/login',
-            {"email": "admin@brandingpioneers.com", "password": "SuperAdmin2024!"},
+            {"email": "admin@test.com", "password": "admin123"},
             expected_status=200
         )
         
         # If that fails, try the existing admin user
+        if not success:
+            success, status, data = self.make_request(
+                'POST',
+                'auth/login',
+                {"email": "admin@brandingpioneers.com", "password": "SuperAdmin2024!"},
+                expected_status=200
+            )
+        
+        # If that fails, try the other admin user
         if not success:
             success, status, data = self.make_request(
                 'POST',
