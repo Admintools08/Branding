@@ -510,6 +510,7 @@ const App = () => {
       position: '',
       manager: '',
       start_date: new Date().toISOString().split('T')[0],
+      birthday: '',
       phone: '',
       emergency_contact: '',
       status: 'onboarding'
