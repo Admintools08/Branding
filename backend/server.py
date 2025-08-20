@@ -742,6 +742,74 @@ async def update_employee(
     updated_employee = await db.employees.find_one({"id": employee_id})
     return Employee(**parse_from_mongo(updated_employee))
 
+@api_router.put("/employees/{employee_id}/profile", response_model=Employee)
+async def update_employee_profile(
+    employee_id: str,
+    update_data: dict,
+    current_user: dict = Depends(auth_service.require_permission(Permission.UPDATE_EMPLOYEE)),
+    request: Request = None
+):
+    """Enhanced employee profile update endpoint"""
+    employee = await db.employees.find_one({"id": employee_id})
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    # Validate and process update fields
+    valid_fields = {'name', 'employee_id', 'email', 'department', 'manager', 'start_date', 'status', 'exit_date'}
+    update_dict = {}
+    
+    for field, value in update_data.items():
+        if field in valid_fields and value is not None:
+            # Handle date fields
+            if field in ['start_date', 'exit_date'] and isinstance(value, str):
+                try:
+                    update_dict[field] = datetime.fromisoformat(value.replace('Z', '+00:00'))
+                except ValueError:
+                    raise HTTPException(status_code=400, detail=f"Invalid date format for {field}")
+            else:
+                update_dict[field] = value
+    
+    # Check for email uniqueness if being updated
+    if 'email' in update_dict and update_dict['email'] != employee.get('email'):
+        existing_email = await db.employees.find_one({"email": update_dict['email'], "id": {"$ne": employee_id}})
+        if existing_email:
+            raise HTTPException(status_code=400, detail="Email already exists")
+    
+    # Check for employee_id uniqueness if being updated
+    if 'employee_id' in update_dict and update_dict['employee_id'] != employee.get('employee_id'):
+        existing_emp_id = await db.employees.find_one({"employee_id": update_dict['employee_id'], "id": {"$ne": employee_id}})
+        if existing_emp_id:
+            raise HTTPException(status_code=400, detail="Employee ID already exists")
+    
+    # Update timestamp
+    update_dict["updated_at"] = datetime.now(timezone.utc)
+    update_dict = prepare_for_mongo(update_dict)
+    
+    # Handle status changes and task creation
+    old_status = employee.get("status")
+    new_status = update_dict.get("status")
+    
+    # Create exit tasks if status is changing to exiting
+    if new_status == EmployeeStatus.EXITING and old_status != EmployeeStatus.EXITING:
+        await create_default_tasks_for_employee(employee_id, TaskType.EXIT, current_user["email"])
+    
+    # Update employee
+    await db.employees.update_one({"id": employee_id}, {"$set": update_dict})
+    
+    # Log action
+    client_info = await get_client_info(request)
+    await auth_service.log_action(
+        user_id=current_user["id"],
+        action="update_employee_profile",
+        resource="employee",
+        details={"employee_id": employee_id, "updates": update_dict},
+        **client_info
+    )
+    
+    # Get updated employee
+    updated_employee = await db.employees.find_one({"id": employee_id})
+    return Employee(**parse_from_mongo(updated_employee))
+
 @api_router.delete("/employees/{employee_id}")
 async def delete_employee(
     employee_id: str,
