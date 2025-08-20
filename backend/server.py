@@ -153,6 +153,7 @@ class EmployeeUpdate(BaseModel):
     manager: Optional[str] = None
     status: Optional[EmployeeStatus] = None
     start_date: Optional[datetime] = None
+    birthday: Optional[datetime] = None
     exit_date: Optional[datetime] = None
 
 class Task(BaseModel):
