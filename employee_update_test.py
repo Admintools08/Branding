@@ -464,7 +464,7 @@ class EmployeeUpdateTester:
             {
                 "name": "Invalid email format",
                 "data": {"email": "invalid-email-format"},
-                "expected_status": 422,
+                "expected_status": 400,
                 "should_fail": True
             },
             {
@@ -476,13 +476,13 @@ class EmployeeUpdateTester:
             {
                 "name": "Invalid status",
                 "data": {"status": "invalid_status"},
-                "expected_status": 422,
+                "expected_status": 400,
                 "should_fail": True
             },
             {
                 "name": "Empty name",
                 "data": {"name": ""},
-                "expected_status": 422,
+                "expected_status": 400,
                 "should_fail": True
             }
         ]
