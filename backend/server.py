@@ -64,6 +64,7 @@ class EmployeeStatus(str, Enum):
     ONBOARDING = "onboarding"
     EXITING = "exiting"
     EXITED = "exited"
+    INACTIVE = "inactive"
 
 class TaskStatus(str, Enum):
     PENDING = "pending"
