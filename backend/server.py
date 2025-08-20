@@ -129,6 +129,7 @@ class Employee(BaseModel):
     department: str
     manager: str
     start_date: datetime
+    birthday: Optional[datetime] = None
     exit_date: Optional[datetime] = None
     status: EmployeeStatus
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
