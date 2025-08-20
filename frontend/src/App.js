@@ -751,7 +751,11 @@ const App = () => {
       e.preventDefault();
       setLoading(true);
       try {
-        await onSubmit(formData);
+        const submitData = {
+          ...formData,
+          birthday: formData.birthday ? new Date(formData.birthday).toISOString() : null
+        };
+        await onSubmit(submitData);
         playSound('success');
       } catch (error) {
         playSound('error');
