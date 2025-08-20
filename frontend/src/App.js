@@ -877,6 +877,12 @@ const App = () => {
               >
                 👋 Exiting
               </Button>
+              <Button type="button" variant="outline" size="sm"
+                onClick={() => handleStatusChange('inactive')}
+                disabled={employee.status === 'inactive'}
+              >
+                ⏸️ Inactive
+              </Button>
             </div>
             <Button type="button" variant="destructive" size="sm" onClick={handleDelete}>
               <Trash2 className="w-4 h-4 mr-1" />
