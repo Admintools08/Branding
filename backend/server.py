@@ -127,7 +127,9 @@ class Employee(BaseModel):
     employee_id: str
     email: EmailStr
     department: str
+    position: Optional[str] = None
     manager: str
+    phone: Optional[str] = None
     start_date: datetime
     birthday: Optional[datetime] = None
     exit_date: Optional[datetime] = None
