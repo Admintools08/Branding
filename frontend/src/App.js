@@ -936,7 +936,13 @@ const App = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg">
+        <Card 
+          className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-200 hover:scale-105"
+          onClick={() => {
+            setCurrentView('employees');
+            playSound('click');
+          }}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -950,7 +956,14 @@ const App = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-lg">
+        <Card 
+          className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-200 hover:scale-105"
+          onClick={() => {
+            setCurrentView('tasks');
+            playSound('click');
+            // You can add additional logic here to filter completed tasks if needed
+          }}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -964,7 +977,14 @@ const App = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 shadow-lg">
+        <Card 
+          className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-200 hover:scale-105"
+          onClick={() => {
+            setCurrentView('tasks');
+            playSound('click');
+            // You can add additional logic here to filter active/pending tasks if needed
+          }}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -978,7 +998,14 @@ const App = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 shadow-lg">
+        <Card 
+          className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-200 hover:scale-105"
+          onClick={() => {
+            setCurrentView('tasks');
+            playSound('click');
+            // You can add additional logic here to filter urgent/overdue tasks if needed
+          }}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
