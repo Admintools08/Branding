@@ -143,7 +143,23 @@ frontend:
     status_history:
         - working: false
           agent: "main"
-          comment: "Fixed anniversary display logic to show 'Joining Date Anniversary' when years_of_service is 0, instead of '0 Year Anniversary'. Updated the conditional logic in upcoming events display."
+  - task: "Excel Import Dependency Fix"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high" 
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported Excel import error: 'Missing optional dependency 'openpyxl'. Use pip or conda to install openpyxl.'"
+        - working: true
+          agent: "main"
+          comment: "Verified openpyxl 3.1.5 is properly installed and pandas 2.3.1 can read Excel files. Restarted backend service to ensure proper library loading."
+        - working: true
+          agent: "testing"
+          comment: "✅ Excel Import Feature - All 9/9 tests passed successfully! Excel (.xlsx), CSV import, file format validation, duplicate Employee ID handling, technical verification of pandas.read_excel(), AI analysis component, file cleanup, and error handling all working correctly. The 'Missing optional dependency openpyxl' error has been completely resolved."
 
 backend:
   - task: "Authentication System"
