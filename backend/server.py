@@ -758,13 +758,13 @@ async def update_employee_profile(
         raise HTTPException(status_code=404, detail="Employee not found")
     
     # Validate and process update fields
-    valid_fields = {'name', 'employee_id', 'email', 'department', 'manager', 'start_date', 'status', 'exit_date'}
+    valid_fields = {'name', 'employee_id', 'email', 'department', 'manager', 'start_date', 'birthday', 'status', 'exit_date'}
     update_dict = {}
     
     for field, value in update_data.items():
         if field in valid_fields and value is not None:
             # Handle date fields
-            if field in ['start_date', 'exit_date'] and isinstance(value, str):
+            if field in ['start_date', 'birthday', 'exit_date'] and isinstance(value, str):
                 try:
                     update_dict[field] = datetime.fromisoformat(value.replace('Z', '+00:00'))
                 except ValueError:
