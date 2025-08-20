@@ -267,6 +267,21 @@ backend:
           agent: "testing"
           comment: "✅ COMPREHENSIVE TESTING COMPLETED - All dashboard features working perfectly: Stats calculation (employee counts by status: 5 total employees across all statuses), Task statistics (144 total tasks: pending, completed, overdue counts), Recent activities tracking (recent employees and tasks), Real-time data updates from database, Proper API endpoints for dashboard data. Current stats: 5 employees, 144 tasks. All 2 dashboard API tests passed."
 
+  - task: "Birthday/Anniversary Reminder System"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Added birthday field to Employee model, updated POST /employees and PUT /employees/{employee_id}/profile endpoints, implemented GET /api/dashboard/upcoming-events and GET /api/dashboard/upcoming-tasks endpoints for birthday and anniversary tracking"
+        - working: true
+          agent: "testing"
+          comment: "✅ BIRTHDAY/ANNIVERSARY REMINDER SYSTEM FULLY TESTED AND WORKING - All 10/10 tests passed successfully! ✅ Employee Model Updates (4/4): Birthday field included in Employee creation and updates, POST /employees endpoint with birthday field working perfectly, PUT /employees/{employee_id}/profile endpoint with birthday field updates working correctly, Birthday field persistence verified in database. ✅ Dashboard Endpoints (2/2): GET /api/dashboard/upcoming-events returning birthdays and anniversaries correctly with proper date calculations, GET /api/dashboard/upcoming-tasks returning tasks due in next 7 days with overdue detection. ✅ Logic Verification (4/4): Created test employees with different birthdays and start dates, Upcoming events logic working correctly with proper days_until calculation (0-30 days), Authentication with admin@test.com/admin123 working, Test data cleanup successful. The birthday/anniversary reminder system is fully functional and production-ready."
+
 frontend:
   - task: "User Authentication UI"
     implemented: true
