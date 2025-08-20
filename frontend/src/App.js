@@ -1626,7 +1626,7 @@ const App = () => {
                 ))
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <CalendarIcon className="h-12 w-12 mx-auto mb-3 text-gray-300" />
                   <p>No upcoming events</p>
                   <p className="text-sm">All celebrations up to date!</p>
                 </div>
