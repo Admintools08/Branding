@@ -147,6 +147,24 @@ backend:
           agent: "testing"
           comment: "✅ COMPREHENSIVE TESTING COMPLETED - All employee management features working perfectly: Create employee with all required fields (name, employee_id, email, department, manager, start_date), Read employees (list and individual), Update employee profiles and status changes, Delete employees with associated tasks cleanup, Status transitions (onboarding→active→exiting→exited) with automatic task creation (25 onboarding + 18 exit tasks), Data validation and duplicate prevention. All 5 employee management tests passed."
 
+  - task: "Employee Update Functionality"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported 'Failed to update employee: Not Found' error when editing profiles, plus data getting lost during updates"
+        - working: true
+          agent: "main"
+          comment: "BACKEND FIXES MADE: Added missing '/employees/{employee_id}/profile' endpoint, Enhanced EmployeeUpdate model to include email, employee_id, start_date fields, Added INACTIVE status to EmployeeStatus enum, Added email and employee_id uniqueness validation, Enhanced both '/employees/{employee_id}' and '/employees/{employee_id}/profile' endpoints. FRONTEND FIXES MADE: Added 'Inactive' status button and badge display, Enhanced status display logic"
+        - working: true
+          agent: "testing"
+          comment: "✅ EMPLOYEE UPDATE FUNCTIONALITY FULLY TESTED AND WORKING - All 11/11 tests passed: ✅ Employee profile update via '/employees/{employee_id}/profile' endpoint working correctly with proper data persistence, ✅ Employee status update via '/employees/{employee_id}' endpoint working for all status transitions including new 'inactive' status, ✅ All status options (active, onboarding, exiting, exited, inactive) working correctly, ✅ Email and employee_id uniqueness validation working properly, ✅ Data persistence verified - no data loss during updates, ✅ Edge cases handled: invalid email format, invalid status, empty name, invalid date format all properly validated with 400 status codes, ✅ 'Employee not found' error fixed - returns proper 404 for non-existent employees and works correctly for valid employees. Fixed validation issue in profile update endpoint that was causing 500 errors."
+
   - task: "Task Management System"
     implemented: true
     working: true
