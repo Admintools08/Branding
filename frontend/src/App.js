@@ -522,7 +522,6 @@ const App = () => {
       start_date: new Date().toISOString().split('T')[0],
       birthday: '',
       phone: '',
-      emergency_contact: '',
       status: 'onboarding'
     });
     const [loading, setLoading] = useState(false);
