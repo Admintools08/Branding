@@ -1167,6 +1167,140 @@ async def get_recent_activities(
         "recent_tasks": [Task(**parse_from_mongo(task)) for task in recent_tasks]
     }
 
+@api_router.get("/dashboard/upcoming-events")
+async def get_upcoming_events(
+    current_user: dict = Depends(auth_service.require_permission(Permission.VIEW_ANALYTICS))
+):
+    """Get upcoming birthdays and work anniversaries"""
+    from datetime import date, timedelta
+    
+    today = date.today()
+    next_30_days = today + timedelta(days=30)
+    
+    # Get all active employees with birthdays
+    employees = await db.employees.find({"status": {"$in": ["active", "onboarding"]}}).to_list(1000)
+    
+    upcoming_birthdays = []
+    upcoming_anniversaries = []
+    
+    for emp_data in employees:
+        employee = Employee(**parse_from_mongo(emp_data))
+        
+        # Check birthdays
+        if employee.birthday:
+            # Convert to date for comparison
+            birthday_this_year = employee.birthday.replace(year=today.year).date()
+            
+            # If birthday already passed this year, check next year
+            if birthday_this_year < today:
+                birthday_this_year = birthday_this_year.replace(year=today.year + 1)
+            
+            # If within next 30 days
+            if today <= birthday_this_year <= next_30_days:
+                days_until = (birthday_this_year - today).days
+                upcoming_birthdays.append({
+                    "employee": employee,
+                    "date": birthday_this_year,
+                    "days_until": days_until,
+                    "type": "birthday"
+                })
+        
+        # Check work anniversaries
+        work_anniversary = employee.start_date.replace(year=today.year).date()
+        
+        # If anniversary already passed this year, check next year
+        if work_anniversary < today:
+            work_anniversary = work_anniversary.replace(year=today.year + 1)
+        
+        # If within next 30 days
+        if today <= work_anniversary <= next_30_days:
+            days_until = (work_anniversary - today).days
+            years_of_service = today.year - employee.start_date.year
+            if work_anniversary < today:
+                years_of_service += 1
+            
+            upcoming_anniversaries.append({
+                "employee": employee,
+                "date": work_anniversary,
+                "days_until": days_until,
+                "years_of_service": years_of_service,
+                "type": "work_anniversary"
+            })
+    
+    # Sort by days until event
+    upcoming_birthdays.sort(key=lambda x: x["days_until"])
+    upcoming_anniversaries.sort(key=lambda x: x["days_until"])
+    
+    # Combine and limit to 10 total events
+    all_events = upcoming_birthdays + upcoming_anniversaries
+    all_events.sort(key=lambda x: x["days_until"])
+    
+    return {
+        "upcoming_birthdays": upcoming_birthdays[:5],
+        "upcoming_anniversaries": upcoming_anniversaries[:5],
+        "upcoming_events": all_events[:10]
+    }
+
+@api_router.get("/dashboard/upcoming-tasks") 
+async def get_upcoming_tasks(
+    current_user: dict = Depends(auth_service.require_permission(Permission.VIEW_ANALYTICS))
+):
+    """Get upcoming tasks due in the next 7 days"""
+    from datetime import datetime, timedelta, timezone
+    
+    # Get tasks due in the next 7 days
+    now = datetime.now(timezone.utc)
+    seven_days_from_now = now + timedelta(days=7)
+    
+    # Query for pending tasks with due dates in the next 7 days
+    upcoming_tasks = await db.tasks.find({
+        "status": TaskStatus.PENDING,
+        "due_date": {
+            "$gte": now,
+            "$lte": seven_days_from_now
+        }
+    }).sort("due_date", 1).limit(10).to_list(10)
+    
+    # Get overdue tasks
+    overdue_tasks = await db.tasks.find({
+        "status": TaskStatus.PENDING,
+        "due_date": {"$lt": now}
+    }).sort("due_date", 1).limit(5).to_list(5)
+    
+    tasks_with_employees = []
+    
+    # Combine upcoming and overdue tasks
+    all_tasks = upcoming_tasks + overdue_tasks
+    
+    for task_data in all_tasks:
+        task = Task(**parse_from_mongo(task_data))
+        
+        # Get employee info
+        employee_data = await db.employees.find_one({"id": task.employee_id})
+        employee = Employee(**parse_from_mongo(employee_data)) if employee_data else None
+        
+        # Calculate days until due (or overdue)
+        if task.due_date:
+            days_until = (task.due_date - now).days
+            is_overdue = days_until < 0
+            
+            tasks_with_employees.append({
+                "task": task,
+                "employee": employee,
+                "days_until": days_until,
+                "is_overdue": is_overdue,
+                "priority": "high" if is_overdue else ("medium" if days_until <= 2 else "low")
+            })
+    
+    # Sort by priority (overdue first, then by due date)
+    tasks_with_employees.sort(key=lambda x: (not x["is_overdue"], x["days_until"]))
+    
+    return {
+        "upcoming_tasks": tasks_with_employees[:10],
+        "overdue_count": len([t for t in tasks_with_employees if t["is_overdue"]]),
+        "due_this_week": len([t for t in tasks_with_employees if not t["is_overdue"]])
+    }
+
 # Report generation with enhanced permissions
 def generate_employee_report_pdf(employees, reports_data):
     """Generate PDF report for employees (unchanged from original)"""
