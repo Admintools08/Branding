@@ -434,28 +434,22 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "2.0"
-  test_sequence: 2
-  run_ui: true
+  version: "3.0"
+  test_sequence: 3
+  run_ui: false
 
 test_plan:
   current_focus:
-    - "Complete comprehensive testing of all features"
-    - "Employee Management CRUD operations"
-    - "Excel Import functionality"
-    - "Task Management and filtering"
-    - "Dashboard interactivity and navigation"
-    - "AI Analysis features"
-    - "PDF Report generation"
-    - "Admin Panel functionality"
-    - "Search and filtering across all sections"
+    - "Profile Fields Fix - Position and Phone"
+    - "Emergency Contact Field Removal"
+    - "Anniversary Display Fix - 0 Year Issue"
   stuck_tasks: []
-  test_all: true
-  test_priority: "comprehensive"
+  test_all: false
+  test_priority: "high_first"
 
 agent_communication:
     - agent: "main"
-      message: "Successfully implemented all user requirements: Made dashboard dynamic with clickable cards, fixed employee creation with full form dialogs, made all tabs clickable for navigation. System now shows real data (1 employee, 25 tasks). Ready for comprehensive testing of all functionality."
+      message: "Fixed three critical profile-related issues: 1. Added position and phone fields to backend Employee models and profile update endpoint, 2. Removed emergency_contact field from frontend forms, 3. Fixed anniversary display to show 'Joining Date Anniversary' for 0 years instead of '0 Year Anniversary'. Backend services restarted successfully. Ready for testing to verify all fixes work correctly."
     - agent: "testing"
       message: "🎉 COMPREHENSIVE BACKEND TESTING COMPLETED SUCCESSFULLY! All 30/30 tests passed across all major functionalities: ✅ AUTHENTICATION & SECURITY (6/6 tests): User registration, login with admin@test.com/admin123, JWT token validation, invalid credentials rejection, role-based access control, password management. ✅ EMPLOYEE MANAGEMENT CRUD (5/5 tests): Create, read, update, delete operations, status transitions with automatic task creation. ✅ TASK MANAGEMENT (4/4 tests): Automatic task generation (25 onboarding + 18 exit), CRUD operations, filtering, due date management. ✅ EXCEL IMPORT & EXPORT (2/2 tests): CSV/Excel parsing, data validation, bulk creation. ✅ AI INTEGRATION (3/3 tests): Employee analysis, data validation, task suggestions. ✅ PDF REPORTS (1/1 test): Professional report generation. ✅ DASHBOARD APIS (2/2 tests): Stats calculation, recent activities. ✅ ADMIN FEATURES (2/2 tests): User management, audit logging. ✅ DATABASE OPERATIONS (2/2 tests): Data persistence, UUID handling. ✅ API VALIDATION (3/3 tests): Input validation, HTTP status codes, error handling. Current system state: 5 employees, 144 tasks, all features fully operational. Backend is production-ready!"
     - agent: "testing"
