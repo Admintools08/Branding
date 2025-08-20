@@ -70,6 +70,8 @@ const App = () => {
   const [tasks, setTasks] = useState([]);
   const [dashboardStats, setDashboardStats] = useState({});
   const [recentActivities, setRecentActivities] = useState({});
+  const [upcomingEvents, setUpcomingEvents] = useState({});
+  const [upcomingTasks, setUpcomingTasks] = useState({});
   const [currentView, setCurrentView] = useState('dashboard');
   const [aiInsights, setAiInsights] = useState(null);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
