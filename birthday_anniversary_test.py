@@ -175,7 +175,7 @@ class BirthdayAnniversaryTester:
         
         if success:
             # Verify the birthday was updated
-            birthday_updated = data.get('birthday') == "1985-07-04T00:00:00+00:00"
+            birthday_updated = data.get('birthday') in ["1985-07-04T00:00:00+00:00", "1985-07-04T00:00:00Z"]
             name_updated = data.get('name') == "Alice Johnson Updated"
             
             return self.log_test(
