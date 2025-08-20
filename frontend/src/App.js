@@ -1586,35 +1586,51 @@ const App = () => {
         </Card>
       </div>
 
-      {/* Recent Activities */}
+      {/* Upcoming Events & Tasks */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <UserPlus className="w-5 h-5 text-blue-500" />
-              New Ninjas Joining
+              <Calendar className="w-5 h-5 text-blue-500" />
+              Upcoming Events
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivities.recent_employees?.slice(0, 5).map((employee) => (
-                <div key={employee.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                    {employee.name.charAt(0).toUpperCase()}
+              {upcomingEvents.upcoming_events?.slice(0, 5).length > 0 ? (
+                upcomingEvents.upcoming_events.slice(0, 5).map((event, index) => (
+                  <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm ${
+                      event.type === 'birthday' ? 'bg-gradient-to-br from-pink-400 to-purple-400' : 
+                      'bg-gradient-to-br from-green-400 to-blue-400'
+                    }`}>
+                      {event.type === 'birthday' ? '🎂' : '🎉'}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900">{event.employee?.name}</p>
+                      <p className="text-sm text-gray-600">
+                        {event.type === 'birthday' ? 'Birthday' : `${event.years_of_service} Year Anniversary`}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-gray-900">
+                        {event.days_until === 0 ? 'Today!' : 
+                         event.days_until === 1 ? 'Tomorrow' : 
+                         `${event.days_until} days`}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {new Date(event.date).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-900">{employee.name}</p>
-                    <p className="text-sm text-gray-600">{employee.department}</p>
-                  </div>
-                  <Badge className={`${
-                    employee.status === 'active' ? 'bg-green-100 text-green-800' :
-                    employee.status === 'onboarding' ? 'bg-blue-100 text-blue-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {employee.status}
-                  </Badge>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <p>No upcoming events</p>
+                  <p className="text-sm">All celebrations up to date!</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -1622,32 +1638,51 @@ const App = () => {
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Target className="w-5 h-5 text-purple-500" />
-              Latest Mission Updates
+              <Clock className="w-5 h-5 text-purple-500" />
+              Upcoming Tasks
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivities.recent_tasks?.slice(0, 5).map((task) => (
-                <div key={task.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className={`w-3 h-3 rounded-full ${
-                    task.status === 'completed' ? 'bg-green-500' :
-                    task.status === 'pending' ? 'bg-orange-500' :
-                    'bg-red-500'
-                  }`}></div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-900 text-sm">{task.title}</p>
-                    <p className="text-xs text-gray-600">
-                      {employees.find(e => e.id === task.employee_id)?.name || 'Unknown Ninja'}
-                    </p>
+              {upcomingTasks.upcoming_tasks?.slice(0, 5).length > 0 ? (
+                upcomingTasks.upcoming_tasks.slice(0, 5).map((taskItem) => (
+                  <div key={taskItem.task?.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div className={`w-3 h-3 rounded-full ${
+                      taskItem.is_overdue ? 'bg-red-500' :
+                      taskItem.priority === 'high' ? 'bg-orange-500' :
+                      taskItem.priority === 'medium' ? 'bg-yellow-500' :
+                      'bg-green-500'
+                    }`}></div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 text-sm">{taskItem.task?.title}</p>
+                      <p className="text-xs text-gray-600">
+                        {taskItem.employee?.name || 'Unknown Employee'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className={`text-sm font-medium ${
+                        taskItem.is_overdue ? 'text-red-600' : 'text-gray-900'
+                      }`}>
+                        {taskItem.is_overdue ? `${Math.abs(taskItem.days_until)} days overdue` :
+                         taskItem.days_until === 0 ? 'Due today!' :
+                         taskItem.days_until === 1 ? 'Due tomorrow' :
+                         `Due in ${taskItem.days_until} days`}
+                      </p>
+                      <Badge className={`text-xs ${
+                        taskItem.task?.task_type === 'onboarding' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'
+                      }`}>
+                        {taskItem.task?.task_type === 'onboarding' ? '🚀' : '👋'}
+                      </Badge>
+                    </div>
                   </div>
-                  <Badge className={`text-xs ${
-                    task.task_type === 'onboarding' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'
-                  }`}>
-                    {task.task_type === 'onboarding' ? '🚀' : '👋'}
-                  </Badge>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Clock className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <p>No upcoming tasks</p>
+                  <p className="text-sm">All missions on track!</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
