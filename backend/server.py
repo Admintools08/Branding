@@ -764,7 +764,7 @@ async def update_employee_profile(
         raise HTTPException(status_code=404, detail="Employee not found")
     
     # Validate and process update fields
-    valid_fields = {'name', 'employee_id', 'email', 'department', 'manager', 'start_date', 'birthday', 'status', 'exit_date'}
+    valid_fields = {'name', 'employee_id', 'email', 'department', 'position', 'manager', 'phone', 'start_date', 'birthday', 'status', 'exit_date'}
     update_dict = {}
     
     for field, value in update_data.items():
