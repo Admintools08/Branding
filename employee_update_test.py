@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 import time
 
 class EmployeeUpdateTester:
-    def __init__(self, base_url="https://employee-fix-plus.preview.emergentagent.com"):
+    def __init__(self, base_url="https://user-data-update.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.token = None
