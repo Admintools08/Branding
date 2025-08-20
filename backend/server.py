@@ -142,6 +142,7 @@ class EmployeeCreate(BaseModel):
     department: str
     manager: str
     start_date: datetime
+    birthday: Optional[datetime] = None
     status: EmployeeStatus = EmployeeStatus.ONBOARDING
 
 class EmployeeUpdate(BaseModel):
