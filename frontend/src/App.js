@@ -876,15 +876,6 @@ const App = () => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="edit-emergency_contact">Emergency Contact</Label>
-            <Input
-              id="edit-emergency_contact"
-              value={formData.emergency_contact}
-              onChange={(e) => setFormData({...formData, emergency_contact: e.target.value})}
-            />
-          </div>
-
           <div className="flex justify-between pt-4">
             <div className="space-x-2">
               <Button type="button" variant="outline" size="sm" 
