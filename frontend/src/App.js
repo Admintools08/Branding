@@ -164,7 +164,7 @@ const App = () => {
 
   const loadData = async () => {
     try {
-      const [employeesRes, tasksRes, statsRes, activitiesRes] = await Promise.all([
+      const [employeesRes, tasksRes, statsRes, activitiesRes, eventsRes, upcomingTasksRes] = await Promise.all([
         axios.get(`${API}/employees`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
@@ -176,6 +176,12 @@ const App = () => {
         }),
         axios.get(`${API}/dashboard/recent-activities`, {
           headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get(`${API}/dashboard/upcoming-events`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get(`${API}/dashboard/upcoming-tasks`, {
+          headers: { Authorization: `Bearer ${token}` }
         })
       ]);
 
@@ -183,6 +189,8 @@ const App = () => {
       setTasks(tasksRes.data);
       setDashboardStats(statsRes.data);
       setRecentActivities(activitiesRes.data);
+      setUpcomingEvents(eventsRes.data);
+      setUpcomingTasks(upcomingTasksRes.data);
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Failed to load data');
