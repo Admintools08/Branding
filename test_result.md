@@ -443,7 +443,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Profile Fields Fix - Position and Phone"
     - "Emergency Contact Field Removal"
     - "Anniversary Display Fix - 0 Year Issue"
   stuck_tasks: []
