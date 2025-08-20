@@ -508,6 +508,7 @@ const App = () => {
       employee_id: '',
       department: '',
       position: '',
+      manager: '',
       start_date: new Date().toISOString().split('T')[0],
       phone: '',
       emergency_contact: '',
@@ -519,7 +520,12 @@ const App = () => {
       e.preventDefault();
       setLoading(true);
       try {
-        await onSubmit(formData);
+        // Convert start_date to datetime format
+        const submitData = {
+          ...formData,
+          start_date: new Date(formData.start_date).toISOString()
+        };
+        await onSubmit(submitData);
         playSound('success');
       } catch (error) {
         playSound('error');
@@ -590,6 +596,16 @@ const App = () => {
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
+            <Label htmlFor="manager">Manager *</Label>
+            <Input
+              id="manager"
+              value={formData.manager}
+              onChange={(e) => setFormData({...formData, manager: e.target.value})}
+              placeholder="Jane Smith"
+              required
+            />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="start_date">Start Date *</Label>
             <Input
               id="start_date"
@@ -599,6 +615,9 @@ const App = () => {
               required
             />
           </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number</Label>
             <Input
@@ -608,16 +627,15 @@ const App = () => {
               placeholder="+1 (555) 123-4567"
             />
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="emergency_contact">Emergency Contact</Label>
-          <Input
-            id="emergency_contact"
-            value={formData.emergency_contact}
-            onChange={(e) => setFormData({...formData, emergency_contact: e.target.value})}
-            placeholder="Jane Doe - +1 (555) 987-6543"
-          />
+          <div className="space-y-2">
+            <Label htmlFor="emergency_contact">Emergency Contact</Label>
+            <Input
+              id="emergency_contact"
+              value={formData.emergency_contact}
+              onChange={(e) => setFormData({...formData, emergency_contact: e.target.value})}
+              placeholder="Jane Doe - +1 (555) 987-6543"
+            />
+          </div>
         </div>
 
         <div className="flex justify-end space-x-3 pt-4">
