@@ -521,10 +521,11 @@ const App = () => {
       e.preventDefault();
       setLoading(true);
       try {
-        // Convert start_date to datetime format
+        // Convert start_date and birthday to datetime format
         const submitData = {
           ...formData,
-          start_date: new Date(formData.start_date).toISOString()
+          start_date: new Date(formData.start_date).toISOString(),
+          birthday: formData.birthday ? new Date(formData.birthday).toISOString() : null
         };
         await onSubmit(submitData);
         playSound('success');
