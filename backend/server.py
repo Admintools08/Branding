@@ -154,7 +154,9 @@ class EmployeeUpdate(BaseModel):
     employee_id: Optional[str] = None
     email: Optional[EmailStr] = None
     department: Optional[str] = None
+    position: Optional[str] = None
     manager: Optional[str] = None
+    phone: Optional[str] = None
     status: Optional[EmployeeStatus] = None
     start_date: Optional[datetime] = None
     birthday: Optional[datetime] = None
