@@ -650,18 +650,6 @@ const App = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="emergency_contact">Emergency Contact</Label>
-            <Input
-              id="emergency_contact"
-              value={formData.emergency_contact}
-              onChange={(e) => setFormData({...formData, emergency_contact: e.target.value})}
-              placeholder="Jane Doe - +1 (555) 987-6543"
-            />
-          </div>
-        </div>
-
         <div className="flex justify-end space-x-3 pt-4">
           <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
             Cancel
