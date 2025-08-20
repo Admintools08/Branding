@@ -766,6 +766,23 @@ async def update_employee_profile(
                     update_dict[field] = datetime.fromisoformat(value.replace('Z', '+00:00'))
                 except ValueError:
                     raise HTTPException(status_code=400, detail=f"Invalid date format for {field}")
+            # Validate email format
+            elif field == 'email':
+                if '@' not in str(value) or '.' not in str(value):
+                    raise HTTPException(status_code=400, detail="Invalid email format")
+                update_dict[field] = value
+            # Validate status enum
+            elif field == 'status':
+                try:
+                    EmployeeStatus(value)  # This will raise ValueError if invalid
+                    update_dict[field] = value
+                except ValueError:
+                    raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {', '.join([s.value for s in EmployeeStatus])}")
+            # Validate name is not empty
+            elif field == 'name':
+                if not str(value).strip():
+                    raise HTTPException(status_code=400, detail="Name cannot be empty")
+                update_dict[field] = value
             else:
                 update_dict[field] = value
     
