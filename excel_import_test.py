@@ -11,7 +11,7 @@ import time
 import io
 
 class ExcelImportTester:
-    def __init__(self, base_url="https://openpyxl-install.preview.emergentagent.com"):
+    def __init__(self, base_url="https://data-import-tool-1.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.token = None

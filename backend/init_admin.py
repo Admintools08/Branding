@@ -181,6 +181,6 @@ if __name__ == "__main__":
     asyncio.run(create_sample_data())
     
     print("\n🎉 Database initialization complete!")
-    print("\n🔗 Access your HR system at: https://openpyxl-install.preview.emergentagent.com")
+    print("\n🔗 Access your HR system at: https://data-import-tool-1.preview.emergentagent.com")
     print("📧 Login with: admin@brandingpioneers.com")
     print("🔐 Password: SuperAdmin2024!")
