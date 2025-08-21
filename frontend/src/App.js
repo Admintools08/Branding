@@ -394,11 +394,13 @@ const App = () => {
   // Optimized handlers to prevent unnecessary re-renders
   const handleEmailChange = useCallback((e) => {
     setLoginForm(prev => ({ ...prev, email: e.target.value }));
-  }, []);
+    if (loginError) setLoginError(false); // Clear error when user starts typing
+  }, [loginError]);
 
   const handlePasswordChange = useCallback((e) => {
     setLoginForm(prev => ({ ...prev, password: e.target.value }));
-  }, []);
+    if (loginError) setLoginError(false); // Clear error when user starts typing
+  }, [loginError]);
 
   const handleTogglePasswordVisibility = useCallback(() => {
     setLoginForm(prev => ({ ...prev, showPassword: !prev.showPassword }));
