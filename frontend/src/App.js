@@ -1756,6 +1756,7 @@ const App = () => {
             tasks={tasks}
             onDownloadReport={downloadReport}
             playSound={playSound}
+            token={token}
           />
         )}
         {currentView === 'tasks' && (
