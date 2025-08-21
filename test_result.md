@@ -503,8 +503,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Emergency Contact Field Removal"
-    - "Anniversary Display Fix - 0 Year Issue"
+    - "Excel Template Download API"
+    - "Download Template Button UI"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
