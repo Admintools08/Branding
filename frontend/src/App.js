@@ -1599,54 +1599,94 @@ const App = () => {
 
         {/* Tasks by Type */}
         {Object.keys(groupedTasks).map((taskType) => (
-          <Card key={taskType} className="overflow-hidden">
-            <CardHeader className={`pb-3 ${taskType === 'onboarding' ? 'bg-blue-50' : 'bg-yellow-50'}`}>
-              <CardTitle className="text-xl flex items-center gap-2">
-                {taskType === 'onboarding' ? '🚀' : '👋'}
-                {taskType === 'onboarding' ? 'Onboarding Missions' : 'Exit Missions'}
-                <Badge variant="secondary" className="ml-2">
-                  {groupedTasks[taskType].length}
-                </Badge>
+          <Card key={taskType} className="overflow-hidden shadow-lg border-0">
+            <CardHeader className={`pb-3 ${taskType === 'onboarding' ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200' : 'bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-200'}`}>
+              <CardTitle className="text-xl flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {taskType === 'onboarding' ? '🚀' : '👋'}
+                  {taskType === 'onboarding' ? 'Onboarding Missions' : 'Exit Missions'}
+                  <Badge variant="secondary" className="ml-2">
+                    {groupedTasks[taskType].length}
+                  </Badge>
+                </div>
+                {groupedTasks[taskType].some(task => selectedTasks.has(task.id)) && (
+                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-300">
+                    {groupedTasks[taskType].filter(task => selectedTasks.has(task.id)).length} selected
+                  </Badge>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="divide-y divide-gray-100">
                 {groupedTasks[taskType].map((task) => (
-                  <div key={task.id} className="p-4 hover:bg-gray-50">
+                  <div 
+                    key={task.id} 
+                    className={`p-4 transition-all duration-200 ${
+                      selectedTasks.has(task.id) 
+                        ? 'bg-purple-50 border-l-4 border-purple-400' 
+                        : 'hover:bg-gray-50'
+                    }`}
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3">
-                          <Checkbox 
-                            checked={task.status === 'completed'}
-                            onCheckedChange={(checked) => 
-                              onUpdateTask(task.id, checked ? 'completed' : 'pending')
-                            }
-                          />
-                          <div>
+                          {/* Selection checkbox */}
+                          <div className="flex items-center">
+                            <Checkbox 
+                              checked={selectedTasks.has(task.id)}
+                              onCheckedChange={(checked) => handleTaskSelect(task.id, checked)}
+                              className="mr-2"
+                            />
+                            {/* Task completion checkbox */}
+                            <Checkbox 
+                              checked={task.status === 'completed'}
+                              onCheckedChange={(checked) => 
+                                onUpdateTask(task.id, checked ? 'completed' : 'pending')
+                              }
+                              className="text-green-600"
+                            />
+                          </div>
+                          <div className="flex-1">
                             <h4 className={`font-medium ${task.status === 'completed' ? 'line-through text-gray-500' : ''}`}>
                               {task.title}
                             </h4>
-                            <p className="text-sm text-gray-600">
-                              Assigned to: {getEmployeeName(task.employee_id)}
-                            </p>
+                            <div className="flex items-center space-x-4 mt-1">
+                              <p className="text-sm text-gray-600 flex items-center">
+                                <span className="inline-block w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
+                                Assigned to: <strong className="ml-1">{getEmployeeName(task.employee_id)}</strong>
+                              </p>
+                              {task.description && (
+                                <p className="text-xs text-gray-500 truncate max-w-md">
+                                  {task.description}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <Badge className={`${
-                          task.status === 'completed' ? 'bg-green-100 text-green-800' :
-                          task.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
+                        <Badge className={`transition-all duration-200 ${
+                          task.status === 'completed' ? 'bg-green-100 text-green-800 shadow-sm' :
+                          task.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800 shadow-sm' :
                           'bg-gray-100 text-gray-800'
                         }`}>
                           {task.status === 'completed' && '✅'}
                           {task.status === 'in_progress' && '⏳'}
                           {task.status === 'pending' && '📋'}
-                          {' '}{task.status}
+                          {' '}{task.status.replace('_', ' ')}
                         </Badge>
                         {task.due_date && (
-                          <span className="text-sm text-gray-500">
+                          <span className={`text-sm ${
+                            new Date(task.due_date) < new Date() && task.status !== 'completed' 
+                              ? 'text-red-600 font-medium' 
+                              : 'text-gray-500'
+                          }`}>
+                            {new Date(task.due_date) < new Date() && task.status !== 'completed' && '🚨 '}
                             Due: {new Date(task.due_date).toLocaleDateString()}
                           </span>
+                        )}
+                        {selectedTasks.has(task.id) && (
+                          <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
                         )}
                       </div>
                     </div>
