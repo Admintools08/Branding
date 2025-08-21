@@ -102,7 +102,9 @@ const LoginForm = React.memo(({
                 placeholder="your.email@company.com"
                 value={loginForm.email}
                 onChange={onEmailChange}
-                className="pl-10 border-gray-300 focus:border-purple-500"
+                className={`pl-10 ${hasError 
+                  ? 'border-red-300 focus:border-red-500' 
+                  : 'border-gray-300 focus:border-purple-500'}`}
                 required
               />
             </div>
