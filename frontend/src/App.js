@@ -933,7 +933,7 @@ const App = () => {
   };
 
   // Employee Management Component
-  const EmployeeManagement = ({ employees, onCreateEmployee, onUpdateEmployee, onUpdateEmployeeStatus, onDeleteEmployee, onImportFromExcel, onAnalyzeEmployee, tasks, onDownloadReport, playSound }) => {
+  const EmployeeManagement = ({ employees, onCreateEmployee, onUpdateEmployee, onUpdateEmployeeStatus, onDeleteEmployee, onImportFromExcel, onAnalyzeEmployee, tasks, onDownloadReport, playSound, token }) => {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isExcelDialogOpen, setIsExcelDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
