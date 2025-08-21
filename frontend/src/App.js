@@ -972,6 +972,38 @@ const App = () => {
       }
     };
 
+    const downloadTemplate = async () => {
+      try {
+        playSound('click');
+        const response = await axios.get(`${API}/employees/download-template`, {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: 'blob'
+        });
+        
+        // Create download link
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        
+        // Generate filename with current date
+        const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
+        link.setAttribute('download', `employee_import_template_${today}.xlsx`);
+        
+        // Trigger download
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        
+        // Clean up
+        window.URL.revokeObjectURL(url);
+        
+        toast.success('Template downloaded successfully!');
+      } catch (error) {
+        console.error('Template download failed:', error);
+        toast.error('Failed to download template. Please try again.');
+      }
+    };
+
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
