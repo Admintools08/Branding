@@ -405,7 +405,6 @@ const App = () => {
   };
 
   // Login Component
-  console.log('LoginForm render - loginForm state:', loginForm);
   const LoginForm = () => (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4">
       <div className="absolute inset-0 opacity-20 bg-gray-900"></div>
