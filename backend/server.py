@@ -1147,7 +1147,9 @@ async def import_employees_from_excel(
             "imported_count": imported_count,
             "total_rows": len(df),
             "errors": errors,
-            "ai_analysis": ai_analysis
+            "ai_analysis": ai_analysis_result,
+            "column_mapping": column_mapping,
+            "warnings": [] if not errors else [f"{len(errors)} rows had issues - check errors for details"]
         }
         
         return result
