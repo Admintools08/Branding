@@ -1525,18 +1525,28 @@ const App = () => {
                   onClick={() => handleBulkAction('completed')}
                   className="bg-green-600 hover:bg-green-700 text-white"
                   size="sm"
+                  disabled={isBulkLoading}
                 >
-                  <CheckCircle className="h-4 w-4 mr-1" />
-                  Mark Complete ({selectedTasks.size})
+                  {isBulkLoading ? (
+                    <Clock className="h-4 w-4 mr-1 animate-spin" />
+                  ) : (
+                    <CheckCircle className="h-4 w-4 mr-1" />
+                  )}
+                  {isBulkLoading ? 'Processing...' : `Mark Complete (${selectedTasks.size})`}
                 </Button>
                 <Button 
                   onClick={() => handleBulkAction('pending')}
                   variant="outline"
                   className="border-orange-300 text-orange-700 hover:bg-orange-50"
                   size="sm"
+                  disabled={isBulkLoading}
                 >
-                  <Clock className="h-4 w-4 mr-1" />
-                  Mark Pending ({selectedTasks.size})
+                  {isBulkLoading ? (
+                    <Clock className="h-4 w-4 mr-1 animate-spin" />
+                  ) : (
+                    <Clock className="h-4 w-4 mr-1" />
+                  )}
+                  {isBulkLoading ? 'Processing...' : `Mark Pending (${selectedTasks.size})`}
                 </Button>
                 <Button 
                   onClick={() => {
