@@ -28,6 +28,7 @@ python-jose[cryptography]>=3.3.0
 reportlab>=4.0.0
 weasyprint>=60.0
 openpyxl>=3.1.0
+xlrd>=2.0.0
 emergentintegrations
 sendgrid>=6.12.4
 pydantic-settings>=2.10.0
