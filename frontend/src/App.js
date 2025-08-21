@@ -434,7 +434,10 @@ const App = () => {
                   type="email"
                   placeholder="your.email@company.com"
                   value={loginForm.email}
-                  onChange={(e) => setLoginForm({...loginForm, email: e.target.value})}
+                  onChange={(e) => {
+                    console.log('Email onChange:', e.target.value);
+                    setLoginForm({...loginForm, email: e.target.value});
+                  }}
                   className="pl-10 border-gray-300 focus:border-purple-500"
                   required
                 />
