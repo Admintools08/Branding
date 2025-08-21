@@ -1757,10 +1757,12 @@ const App = () => {
   if (!user) {
     return <LoginForm 
       loginForm={loginForm}
-      setLoginForm={setLoginForm}
+      onEmailChange={handleEmailChange}
+      onPasswordChange={handlePasswordChange}
+      onTogglePasswordVisibility={handleTogglePasswordVisibility}
       handleLogin={handleLogin}
       loading={loading}
-      setShowForgotPassword={setShowForgotPassword}
+      onShowForgotPassword={handleShowForgotPassword}
     />;
   }
 
