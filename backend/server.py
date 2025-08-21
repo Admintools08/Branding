@@ -884,6 +884,13 @@ async def import_employees_from_excel(
     if not file.filename.endswith(('.xlsx', '.xls', '.csv')):
         raise HTTPException(status_code=400, detail="Please upload an Excel (.xlsx, .xls) or CSV file")
     
+    # Check if Excel engine is available for Excel files
+    if file.filename.endswith(('.xlsx', '.xls')) and not EXCEL_ENGINE_AVAILABLE:
+        raise HTTPException(
+            status_code=400, 
+            detail="Excel file processing not available. openpyxl dependency missing. Please upload a CSV file instead."
+        )
+    
     try:
         # Save uploaded file temporarily for AI analysis
         temp_dir = tempfile.mkdtemp()
