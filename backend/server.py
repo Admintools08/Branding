@@ -1159,6 +1159,197 @@ async def import_employees_from_excel(
             shutil.rmtree(temp_dir, ignore_errors=True)
         raise HTTPException(status_code=400, detail=f"Error processing file: {str(e)}")
 
+@api_router.get("/employees/download-template")
+async def download_employee_template(
+    current_user: dict = Depends(auth_service.require_permission(Permission.READ_EMPLOYEE)),
+    request: Request = None
+):
+    """Download Excel template for employee import with sample data and formatting"""
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
+        from openpyxl.utils import get_column_letter
+        from openpyxl.worksheet.datavalidation import DataValidation
+        from datetime import datetime, date
+        import io
+        from fastapi.responses import StreamingResponse
+        
+        # Create workbook with two sheets
+        wb = Workbook()
+        
+        # Sheet 1: Employee Template
+        ws = wb.active
+        ws.title = "Employee Template"
+        
+        # Define column headers
+        required_headers = ["Name", "Employee ID", "Email", "Department", "Manager", "Start Date"]
+        optional_headers = ["Position", "Phone", "Birthday"]
+        all_headers = required_headers + optional_headers
+        
+        # Style definitions
+        header_font = Font(bold=True, color="FFFFFF")
+        required_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+        optional_fill = PatternFill(start_color="70AD47", end_color="70AD47", fill_type="solid")
+        border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+        center_alignment = Alignment(horizontal='center', vertical='center')
+        
+        # Add headers with styling
+        for col, header in enumerate(all_headers, 1):
+            cell = ws.cell(row=1, column=col, value=header)
+            cell.font = header_font
+            cell.alignment = center_alignment
+            cell.border = border
+            
+            # Color code required vs optional fields
+            if header in required_headers:
+                cell.fill = required_fill
+            else:
+                cell.fill = optional_fill
+        
+        # Add sample data rows
+        sample_data = [
+            [
+                "John Smith",
+                "EMP001",
+                "john.smith@company.com",
+                "Engineering",
+                "Sarah Johnson",
+                "2024-01-15",
+                "Senior Developer",
+                "+1-555-0101",
+                "1990-05-15"
+            ],
+            [
+                "Alice Johnson",
+                "EMP002",
+                "alice.johnson@company.com",
+                "Marketing",
+                "Mike Wilson",
+                "2024-02-01",
+                "Marketing Manager",
+                "+1-555-0102",
+                "1988-12-03"
+            ],
+            [
+                "Bob Davis",
+                "EMP003",
+                "bob.davis@company.com",
+                "HR",
+                "Linda Brown",
+                "2024-01-20",
+                "",  # Optional field left empty
+                "+1-555-0103",
+                ""   # Optional field left empty
+            ]
+        ]
+        
+        # Add sample data with borders
+        for row_num, row_data in enumerate(sample_data, 2):
+            for col_num, value in enumerate(row_data, 1):
+                cell = ws.cell(row=row_num, column=col_num, value=value)
+                cell.border = border
+                if col_num in [6, 9]:  # Date columns
+                    cell.alignment = Alignment(horizontal='left')
+        
+        # Set column widths
+        column_widths = [15, 12, 25, 15, 15, 12, 20, 15, 12]
+        for col_num, width in enumerate(column_widths, 1):
+            ws.column_dimensions[get_column_letter(col_num)].width = width
+        
+        # Add data validation for Department column (example departments)
+        dept_validation = DataValidation(
+            type="list",
+            formula1='"Engineering,Marketing,HR,Finance,Sales,Operations,IT,Design"',
+            allow_blank=True
+        )
+        dept_validation.error = "Please select a valid department"
+        dept_validation.errorTitle = "Invalid Department"
+        ws.add_data_validation(dept_validation)
+        dept_validation.add(f'D2:D1000')  # Apply to Department column
+        
+        # Sheet 2: Instructions
+        instructions_ws = wb.create_sheet("Instructions")
+        
+        # Add instructions content
+        instructions = [
+            ["Employee Import Template - Instructions", ""],
+            ["", ""],
+            ["REQUIRED FIELDS (Blue Headers):", ""],
+            ["• Name", "Full name of the employee"],
+            ["• Employee ID", "Unique identifier (e.g., EMP001, EMP002)"],
+            ["• Email", "Valid email address"],
+            ["• Department", "Select from dropdown list"],
+            ["• Manager", "Name of direct manager"],
+            ["• Start Date", "Format: YYYY-MM-DD (e.g., 2024-01-15)"],
+            ["", ""],
+            ["OPTIONAL FIELDS (Green Headers):", ""],
+            ["• Position", "Job title or role"],
+            ["• Phone", "Contact number with country code"],
+            ["• Birthday", "Format: YYYY-MM-DD (e.g., 1990-05-15)"],
+            ["", ""],
+            ["IMPORTANT NOTES:", ""],
+            ["• Do not modify the header row"],
+            ["• Employee ID must be unique"],
+            ["• Email addresses must be valid and unique"],
+            ["• Date format must be YYYY-MM-DD"],
+            ["• Department should be selected from dropdown"],
+            ["• Remove sample data before importing real data"],
+            ["• Maximum file size: 10MB"],
+            ["• Supported formats: .xlsx, .xls, .csv"],
+            ["", ""],
+            ["For support, contact your system administrator.", ""]
+        ]
+        
+        # Style instructions sheet
+        title_font = Font(bold=True, size=16, color="4472C4")
+        section_font = Font(bold=True, size=12, color="70AD47")
+        note_font = Font(bold=True, size=11, color="C5504B")
+        
+        for row_num, (col1, col2) in enumerate(instructions, 1):
+            cell_a = instructions_ws.cell(row=row_num, column=1, value=col1)
+            cell_b = instructions_ws.cell(row=row_num, column=2, value=col2)
+            
+            if "Instructions" in col1:
+                cell_a.font = title_font
+            elif col1.endswith(":") and col1.isupper():
+                cell_a.font = section_font if "REQUIRED" in col1 or "OPTIONAL" in col1 else note_font
+        
+        # Set column widths for instructions
+        instructions_ws.column_dimensions['A'].width = 35
+        instructions_ws.column_dimensions['B'].width = 40
+        
+        # Save to BytesIO
+        excel_buffer = io.BytesIO()
+        wb.save(excel_buffer)
+        excel_buffer.seek(0)
+        
+        # Log action
+        client_info = await get_client_info(request)
+        await auth_service.log_action(
+            user_id=current_user["id"],
+            action="download_template",
+            resource="employee",
+            details={"template_type": "employee_import", "format": "xlsx"},
+            **client_info
+        )
+        
+        # Return as downloadable file
+        filename = f"employee_import_template_{datetime.now().strftime('%Y%m%d')}.xlsx"
+        
+        return StreamingResponse(
+            io.BytesIO(excel_buffer.read()),
+            media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            headers={'Content-Disposition': f'attachment; filename="{filename}"'}
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating template: {str(e)}")
+
 # Task routes with enhanced permissions
 @api_router.post("/tasks", response_model=Task)
 async def create_task(
