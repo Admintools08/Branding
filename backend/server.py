@@ -1434,6 +1434,49 @@ async def update_task(
     updated_task = await db.tasks.find_one({"id": task_id})
     return Task(**parse_from_mongo(updated_task))
 
+@api_router.put("/tasks/bulk", response_model=dict)
+async def bulk_update_tasks(
+    bulk_data: BulkTaskUpdate,
+    current_user: dict = Depends(auth_service.require_permission(Permission.UPDATE_TASK)),
+    request: Request = None
+):
+    """Bulk update multiple tasks with the same status"""
+    if not bulk_data.task_ids:
+        raise HTTPException(status_code=400, detail="No task IDs provided")
+    
+    update_dict = {
+        "status": bulk_data.status.value,
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    # Set completed_date if tasks are being marked as completed
+    if bulk_data.status == TaskStatus.COMPLETED:
+        update_dict["completed_date"] = datetime.now(timezone.utc)
+    
+    update_dict = prepare_for_mongo(update_dict)
+    
+    # Use MongoDB's bulk operations for efficiency
+    result = await db.tasks.update_many(
+        {"id": {"$in": bulk_data.task_ids}}, 
+        {"$set": update_dict}
+    )
+    
+    # Log action for bulk operation
+    client_info = await get_client_info(request)
+    await auth_service.log_action(
+        user_id=current_user["id"],
+        action="bulk_update_tasks",
+        resource="tasks",
+        details={"task_ids": bulk_data.task_ids, "status": bulk_data.status.value, "updated_count": result.modified_count},
+        **client_info
+    )
+    
+    return {
+        "success": True,
+        "updated_count": result.modified_count,
+        "total_requested": len(bulk_data.task_ids)
+    }
+
 # AI Endpoints with enhanced permissions
 @api_router.post("/ai/analyze-employee")
 async def analyze_employee_with_ai(
