@@ -54,11 +54,11 @@ app = FastAPI(title="HR Onboarding & Exit System - Enhanced Security")
 api_router = APIRouter(prefix="/api")
 
 # Initialize services
-try:
-    ai_service = HRAIService()
-except Exception as e:
-    print(f"Warning: AI service initialization failed: {e}")
-    ai_service = None
+# try:
+#     ai_service = HRAIService()
+# except Exception as e:
+#     print(f"Warning: AI service initialization failed: {e}")
+ai_service = None  # Temporarily disabled to fix auth issue
 
 # Initialize Auth Service
 auth_service = AuthService(db, SECRET_KEY, ALGORITHM)
