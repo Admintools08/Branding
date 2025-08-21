@@ -910,11 +910,24 @@ async def import_employees_from_excel(
                 print(f"AI analysis failed: {e}")
         
         # Parse Excel/CSV file
-        if file.filename.endswith('.csv'):
-            df = pd.read_csv(temp_file_path)
-        else:
-            # Explicitly use openpyxl engine for Excel files
-            df = pd.read_excel(temp_file_path, engine='openpyxl')
+        try:
+            if file.filename.endswith('.csv'):
+                df = pd.read_csv(temp_file_path)
+            else:
+                # Explicitly use openpyxl engine for Excel files
+                df = pd.read_excel(temp_file_path, engine='openpyxl')
+        except ImportError as e:
+            shutil.rmtree(temp_dir)
+            if "openpyxl" in str(e):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Excel file processing requires openpyxl. Please install openpyxl or upload a CSV file instead."
+                )
+            else:
+                raise HTTPException(status_code=400, detail=f"Error importing file dependencies: {str(e)}")
+        except Exception as e:
+            shutil.rmtree(temp_dir)
+            raise HTTPException(status_code=400, detail=f"Error reading file: {str(e)}")
         
         # Validate required columns
         required_columns = ['Name', 'Employee ID', 'Email', 'Department', 'Manager', 'Start Date']
