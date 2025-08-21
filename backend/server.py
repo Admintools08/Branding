@@ -1400,6 +1400,17 @@ async def get_tasks(
     tasks = await db.tasks.find(query).to_list(1000)
     return [Task(**parse_from_mongo(task)) for task in tasks]
 
+@api_router.get("/tasks/{task_id}", response_model=Task)
+async def get_task(
+    task_id: str,
+    current_user: dict = Depends(auth_service.require_permission(Permission.READ_TASK))
+):
+    """Get a single task by ID"""
+    task = await db.tasks.find_one({"id": task_id})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return Task(**parse_from_mongo(task))
+
 @api_router.put("/tasks/bulk", response_model=dict)
 async def bulk_update_tasks(
     bulk_data: BulkTaskUpdate,
