@@ -599,6 +599,16 @@ const App = () => {
     });
   };
 
+  // Super efficient bulk update using backend bulk endpoint
+  const bulkUpdateTasks = async (taskIds, status) => {
+    return axios.put(`${API}/tasks/bulk`, { 
+      task_ids: taskIds, 
+      status 
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  };
+
   const downloadReport = async (type) => {
     try {
       const response = await axios.get(`${API}/reports/${type}`, {
