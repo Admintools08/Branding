@@ -328,7 +328,40 @@ const App = () => {
       toast.success(`Welcome back, ${userData.name}! 🎉`);
     } catch (error) {
       playSound('error');
-      toast.error(error.response?.data?.detail || 'Login failed');
+      
+      // Enhanced error handling for better user experience
+      let errorMessage = 'Login failed';
+      
+      if (error.response) {
+        const status = error.response.status;
+        const detail = error.response.data?.detail;
+        
+        if (status === 401) {
+          if (detail === 'Invalid credentials') {
+            errorMessage = '🔒 Invalid email or password. Please check your credentials and try again.';
+          } else if (detail === 'Token expired') {
+            errorMessage = '⏰ Your session has expired. Please login again.';
+          } else if (detail === 'User not found') {
+            errorMessage = '👤 No account found with this email address.';
+          } else {
+            errorMessage = '🚫 Authentication failed. Please check your login details.';
+          }
+        } else if (status === 422) {
+          errorMessage = '📝 Please check that your email and password are filled in correctly.';
+        } else if (status === 429) {
+          errorMessage = '⏳ Too many login attempts. Please wait a moment before trying again.';
+        } else if (status >= 500) {
+          errorMessage = '🔧 Server error. Please try again in a few moments.';
+        } else {
+          errorMessage = detail || 'Login failed. Please try again.';
+        }
+      } else if (error.request) {
+        errorMessage = '🌐 Cannot connect to server. Please check your internet connection.';
+      } else {
+        errorMessage = 'An unexpected error occurred. Please try again.';
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
