@@ -1442,7 +1442,7 @@ const App = () => {
       }
     };
 
-    // Handle bulk actions with optimized data loading
+    // Handle bulk actions with super-efficient backend bulk endpoint
     const handleBulkAction = async (action) => {
       if (selectedTasks.size === 0) {
         toast.error('Please select tasks first');
@@ -1452,23 +1452,15 @@ const App = () => {
 
       const taskCount = selectedTasks.size;
       const statusText = action === 'completed' ? 'completed' : 'pending';
+      const taskIds = Array.from(selectedTasks);
       
       // Set loading state
       setIsBulkLoading(true);
       const loadingToast = toast.loading(`Updating ${taskCount} tasks...`);
       
       try {
-        // Update all selected tasks using bulk-friendly function (no individual data reloads)
-        const updatePromises = Array.from(selectedTasks).map(taskId => 
-          onUpdateTaskBulk(taskId, action)
-        );
-        
-        // Execute all updates concurrently
-        const results = await Promise.allSettled(updatePromises);
-        
-        // Count successes and failures
-        const successful = results.filter(result => result.status === 'fulfilled').length;
-        const failed = results.filter(result => result.status === 'rejected').length;
+        // Use the super-efficient bulk endpoint (single database operation)
+        const result = await onBulkUpdateTasks(taskIds, action);
         
         // Reload data only once after all operations complete
         await onLoadData();
@@ -1481,26 +1473,60 @@ const App = () => {
         toast.dismiss(loadingToast);
         setIsBulkLoading(false);
         
-        // Show appropriate feedback
-        if (successful === taskCount) {
+        // Show success feedback
+        const { updated_count, total_requested } = result.data;
+        if (updated_count === total_requested) {
           playSound('success');
-          toast.success(`🎉 Successfully marked ${taskCount} tasks as ${statusText}!`);
-        } else if (successful > 0) {
-          playSound('success');
-          toast.success(`✅ Updated ${successful} tasks. ${failed} tasks failed to update.`);
+          toast.success(`🎉 Successfully marked ${updated_count} tasks as ${statusText}!`);
         } else {
-          playSound('error');
-          toast.error(`❌ Failed to update all ${taskCount} tasks. Please try again.`);
+          playSound('success');
+          toast.success(`✅ Updated ${updated_count} out of ${total_requested} tasks.`);
         }
         
       } catch (error) {
-        // Dismiss loading toast and reset loading state
-        toast.dismiss(loadingToast);
-        setIsBulkLoading(false);
+        // Fallback to individual updates if bulk endpoint fails
+        console.warn('Bulk endpoint failed, falling back to individual updates:', error);
         
-        playSound('error');
-        toast.error('Failed to update tasks. Please try again.');
-        console.error('Bulk update error:', error);
+        try {
+          // Fallback: Update tasks individually
+          const updatePromises = taskIds.map(taskId => 
+            onUpdateTaskBulk(taskId, action)
+          );
+          
+          const results = await Promise.allSettled(updatePromises);
+          const successful = results.filter(result => result.status === 'fulfilled').length;
+          const failed = results.filter(result => result.status === 'rejected').length;
+          
+          // Reload data
+          await onLoadData();
+          
+          // Clear selection and loading state
+          setSelectedTasks(new Set());
+          setIsSelectAllChecked(false);
+          toast.dismiss(loadingToast);
+          setIsBulkLoading(false);
+          
+          // Show appropriate feedback
+          if (successful === taskCount) {
+            playSound('success');
+            toast.success(`🎉 Successfully marked ${taskCount} tasks as ${statusText}!`);
+          } else if (successful > 0) {
+            playSound('success');
+            toast.success(`✅ Updated ${successful} tasks. ${failed} tasks failed to update.`);
+          } else {
+            playSound('error');
+            toast.error(`❌ Failed to update all ${taskCount} tasks. Please try again.`);
+          }
+          
+        } catch (fallbackError) {
+          // Complete failure
+          toast.dismiss(loadingToast);
+          setIsBulkLoading(false);
+          
+          playSound('error');
+          toast.error('Failed to update tasks. Please try again.');
+          console.error('Both bulk and fallback operations failed:', fallbackError);
+        }
       }
     };
 
