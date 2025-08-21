@@ -148,7 +148,7 @@ const LoginForm = React.memo(({
             </button>
           </div>
 
-          {hasError && (
+          {hasError && errorMessage && (
             <div className="bg-red-50 border border-red-200 rounded-md p-3 mt-2">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -158,7 +158,7 @@ const LoginForm = React.memo(({
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-red-800 font-medium">
-                    🔒 Invalid email or password. Please check your credentials and try again.
+                    {errorMessage}
                   </p>
                 </div>
               </div>
