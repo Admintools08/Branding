@@ -1005,30 +1005,111 @@ async def import_employees_from_excel(
         
         imported_count = 0
         errors = []
+        ai_analysis_result = None
+        
+        # Run AI analysis on the file if available
+        if ai_service:
+            try:
+                ai_analysis_result = await ai_service.analyze_employee_data(temp_file_path, current_user["email"])
+            except Exception as e:
+                print(f"AI analysis failed: {e}")
         
         for index, row in df.iterrows():
             try:
+                # Use mapped column names to get data
+                def get_field_value(field_name, default=None):
+                    mapped_col = column_mapping.get(field_name)
+                    if mapped_col and mapped_col in row and pd.notna(row[mapped_col]):
+                        return str(row[mapped_col]).strip()
+                    return default
+                
                 # Check if employee ID already exists
-                existing = await db.employees.find_one({"employee_id": str(row['Employee ID'])})
+                employee_id_value = get_field_value('Employee ID')
+                if not employee_id_value:
+                    errors.append(f"Row {index + 2}: Employee ID is required")
+                    continue
+                    
+                existing = await db.employees.find_one({"employee_id": employee_id_value})
                 if existing:
-                    errors.append(f"Row {index + 2}: Employee ID {row['Employee ID']} already exists")
+                    errors.append(f"Row {index + 2}: Employee ID {employee_id_value} already exists")
                     continue
                 
-                # Parse start date
-                start_date = pd.to_datetime(row['Start Date']).to_pydatetime()
-                if start_date.tzinfo is None:
-                    start_date = start_date.replace(tzinfo=timezone.utc)
+                # Parse required fields
+                name = get_field_value('Name')
+                email = get_field_value('Email')
+                department = get_field_value('Department')
+                manager = get_field_value('Manager')
+                start_date_str = get_field_value('Start Date')
                 
-                # Create employee object
-                employee = Employee(
-                    name=str(row['Name']).strip(),
-                    employee_id=str(row['Employee ID']).strip(),
-                    email=str(row['Email']).strip().lower(),
-                    department=str(row['Department']).strip(),
-                    manager=str(row['Manager']).strip(),
-                    start_date=start_date,
-                    status=EmployeeStatus.ONBOARDING
-                )
+                # Validate required fields
+                if not all([name, email, department, manager, start_date_str]):
+                    missing_fields = []
+                    if not name: missing_fields.append('Name')
+                    if not email: missing_fields.append('Email') 
+                    if not department: missing_fields.append('Department')
+                    if not manager: missing_fields.append('Manager')
+                    if not start_date_str: missing_fields.append('Start Date')
+                    errors.append(f"Row {index + 2}: Missing required fields: {', '.join(missing_fields)}")
+                    continue
+                
+                # Parse dates with multiple format support
+                def parse_date(date_str, field_name="date"):
+                    if not date_str or pd.isna(date_str):
+                        return None
+                    try:
+                        # Try multiple date formats
+                        date_formats = ['%Y-%m-%d', '%m/%d/%Y', '%d/%m/%Y', '%Y/%m/%d', '%m-%d-%Y', '%d-%m-%Y']
+                        for fmt in date_formats:
+                            try:
+                                parsed_date = datetime.strptime(str(date_str), fmt)
+                                if parsed_date.tzinfo is None:
+                                    parsed_date = parsed_date.replace(tzinfo=timezone.utc)
+                                return parsed_date
+                            except ValueError:
+                                continue
+                        # If none worked, try pandas
+                        parsed_date = pd.to_datetime(date_str).to_pydatetime()
+                        if parsed_date.tzinfo is None:
+                            parsed_date = parsed_date.replace(tzinfo=timezone.utc)
+                        return parsed_date
+                    except Exception as e:
+                        raise ValueError(f"Invalid {field_name} format: {date_str}")
+                
+                # Parse start date (required)
+                start_date = parse_date(start_date_str, "start date")
+                
+                # Parse optional fields
+                position = get_field_value('Position')
+                phone = get_field_value('Phone')
+                birthday_str = get_field_value('Birthday')
+                birthday = None
+                if birthday_str:
+                    try:
+                        birthday = parse_date(birthday_str, "birthday")
+                    except ValueError as e:
+                        errors.append(f"Row {index + 2}: {str(e)}")
+                        # Continue without birthday rather than failing
+                
+                # Create employee object with all available data
+                employee_data = {
+                    "name": name,
+                    "employee_id": employee_id_value,
+                    "email": email.lower(),
+                    "department": department,
+                    "manager": manager,
+                    "start_date": start_date,
+                    "status": EmployeeStatus.ONBOARDING
+                }
+                
+                # Add optional fields if available
+                if position:
+                    employee_data["position"] = position
+                if phone:
+                    employee_data["phone"] = phone
+                if birthday:
+                    employee_data["birthday"] = birthday
+                
+                employee = Employee(**employee_data)
                 
                 # Save to database
                 employee_dict = prepare_for_mongo(employee.dict())
