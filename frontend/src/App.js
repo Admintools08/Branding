@@ -303,7 +303,7 @@ const App = () => {
     }
   };
 
-  const handleLogin = async (e) => {
+  const handleLogin = useCallback(async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
@@ -324,7 +324,7 @@ const App = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loginForm.email, loginForm.password]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
