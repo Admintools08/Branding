@@ -1475,6 +1475,9 @@ Security Test User,SEC2024001,security.test@brandingpioneers.com,Security,Admin 
         self.test_new_collections_functionality()
         self.test_database_indexes_performance()
         
+        # Excel Template Download Tests (High Priority User Feature)
+        self.run_excel_template_download_tests()
+        
         # Existing Functionality Tests (Regression)
         print("\n🔄 Existing Functionality Tests (Regression):")
         self.test_existing_employee_management()
