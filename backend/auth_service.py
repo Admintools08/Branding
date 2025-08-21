@@ -279,7 +279,7 @@ class AuthService:
         await self.db.user_invitations.insert_one(invitation.dict())
         
         # Send invitation email
-        invite_url = f"https://data-import-tool-1.preview.emergentagent.com/accept-invite?token={invitation.invitation_token}"
+        invite_url = f"https://type-ease.preview.emergentagent.com/accept-invite?token={invitation.invitation_token}"
         
         try:
             inviter = await self.db.users.find_one({"id": invited_by})
@@ -366,7 +366,7 @@ class AuthService:
         await self.db.password_resets.insert_one(reset_token.dict())
         
         # Send reset email
-        reset_url = f"https://data-import-tool-1.preview.emergentagent.com/reset-password?token={reset_token.token}"
+        reset_url = f"https://type-ease.preview.emergentagent.com/reset-password?token={reset_token.token}"
         
         try:
             await email_service.send_password_reset(
@@ -420,7 +420,7 @@ class AuthService:
         
         # Send verification email
         user = await self.db.users.find_one({"id": user_id})
-        verification_url = f"https://data-import-tool-1.preview.emergentagent.com/verify-email?token={verification.token}"
+        verification_url = f"https://type-ease.preview.emergentagent.com/verify-email?token={verification.token}"
         
         try:
             await email_service.send_email_verification(
