@@ -1371,11 +1371,15 @@ const App = () => {
   const TaskManagement = ({ tasks, employees, onUpdateTask, onDownloadReport }) => {
     const [filter, setFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
+    const [nameFilter, setNameFilter] = useState('all');
+    const [selectedTasks, setSelectedTasks] = useState(new Set());
+    const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
 
     const filteredTasks = tasks.filter(task => {
       const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesFilter = filter === 'all' || task.status === filter || task.task_type === filter;
-      return matchesSearch && matchesFilter;
+      const matchesNameFilter = nameFilter === 'all' || task.employee_id === nameFilter;
+      return matchesSearch && matchesFilter && matchesNameFilter;
     });
 
     const getEmployeeName = (employeeId) => {
@@ -1389,6 +1393,76 @@ const App = () => {
       acc[key].push(task);
       return acc;
     }, {});
+
+    // Handle individual task selection
+    const handleTaskSelect = (taskId, isSelected) => {
+      const newSelectedTasks = new Set(selectedTasks);
+      if (isSelected) {
+        newSelectedTasks.add(taskId);
+      } else {
+        newSelectedTasks.delete(taskId);
+      }
+      setSelectedTasks(newSelectedTasks);
+      
+      // Update select all checkbox state
+      setIsSelectAllChecked(newSelectedTasks.size === filteredTasks.length && filteredTasks.length > 0);
+    };
+
+    // Handle select all toggle
+    const handleSelectAll = (isSelected) => {
+      if (isSelected) {
+        const allTaskIds = new Set(filteredTasks.map(task => task.id));
+        setSelectedTasks(allTaskIds);
+        setIsSelectAllChecked(true);
+        playSound('success');
+        toast.success(`Selected ${filteredTasks.length} tasks`);
+      } else {
+        setSelectedTasks(new Set());
+        setIsSelectAllChecked(false);
+        playSound('click');
+      }
+    };
+
+    // Handle bulk actions
+    const handleBulkAction = async (action) => {
+      if (selectedTasks.size === 0) {
+        toast.error('Please select tasks first');
+        playSound('error');
+        return;
+      }
+
+      const taskCount = selectedTasks.size;
+      const statusText = action === 'completed' ? 'completed' : 'pending';
+      
+      try {
+        // Update all selected tasks
+        const updatePromises = Array.from(selectedTasks).map(taskId => 
+          onUpdateTask(taskId, action)
+        );
+        
+        await Promise.all(updatePromises);
+        
+        // Clear selection
+        setSelectedTasks(new Set());
+        setIsSelectAllChecked(false);
+        
+        // Show success feedback
+        playSound('success');
+        toast.success(`🎉 Marked ${taskCount} tasks as ${statusText}!`);
+        
+      } catch (error) {
+        playSound('error');
+        toast.error('Failed to update some tasks');
+      }
+    };
+
+    // Get unique employees from current tasks for name filter
+    const availableEmployees = [...new Set(tasks.map(task => task.employee_id))]
+      .map(employeeId => ({
+        id: employeeId,
+        name: getEmployeeName(employeeId)
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
 
     return (
       <div className="space-y-6">
