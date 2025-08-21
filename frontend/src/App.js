@@ -391,6 +391,9 @@ const App = () => {
         errorMessage = 'An unexpected error occurred. Please try again.';
       }
       
+      // Set the error message for inline display
+      setLoginErrorMessage(errorMessage);
+      
       toast.error(errorMessage, {
         duration: 5000, // Show error toast longer
         style: {
