@@ -1699,9 +1699,38 @@ const App = () => {
 
         {filteredTasks.length === 0 && (
           <div className="text-center py-12">
-            <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-600 mb-2">No missions found</h3>
-            <p className="text-gray-500">Try adjusting your search or filters</p>
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-8 border border-gray-200">
+              {searchTerm || filter !== 'all' || nameFilter !== 'all' ? (
+                <>
+                  <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-600 mb-2">No missions match your filters</h3>
+                  <p className="text-gray-500 mb-4">
+                    {searchTerm && `No tasks found for "${searchTerm}"`}
+                    {filter !== 'all' && ` with status "${filter}"`}
+                    {nameFilter !== 'all' && ` assigned to ${getEmployeeName(nameFilter)}`}
+                  </p>
+                  <Button 
+                    onClick={() => {
+                      setFilter('all');
+                      setNameFilter('all');
+                      setSearchTerm('');
+                      playSound('click');
+                    }}
+                    variant="outline"
+                    className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Clear All Filters
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-12 w-12 text-green-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-600 mb-2">All missions completed! 🎉</h3>
+                  <p className="text-gray-500">Your ninja team has completed all assigned tasks</p>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>
