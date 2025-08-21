@@ -455,7 +455,10 @@ const App = () => {
                   type={loginForm.showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
                   value={loginForm.password}
-                  onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                  onChange={(e) => {
+                    console.log('Password onChange:', e.target.value.length);
+                    setLoginForm({...loginForm, password: e.target.value});
+                  }}
                   className="pl-10 pr-10 border-gray-300 focus:border-purple-500"
                   required
                 />
