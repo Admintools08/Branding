@@ -853,14 +853,22 @@ async def download_employee_template(
         section_font = Font(bold=True, size=12, color="70AD47")
         note_font = Font(bold=True, size=11, color="C5504B")
         
-        for row_num, (col1, col2) in enumerate(instructions, 1):
+        for row_num, instruction_row in enumerate(instructions, 1):
+            # Ensure we always have 2 elements
+            if isinstance(instruction_row, (list, tuple)) and len(instruction_row) >= 2:
+                col1, col2 = instruction_row[0], instruction_row[1]
+            elif isinstance(instruction_row, (list, tuple)) and len(instruction_row) == 1:
+                col1, col2 = instruction_row[0], ""
+            else:
+                col1, col2 = str(instruction_row), ""
+                
             cell_a = instructions_ws.cell(row=row_num, column=1, value=col1)
             cell_b = instructions_ws.cell(row=row_num, column=2, value=col2)
             
-            if "Instructions" in col1:
+            if "Instructions" in str(col1):
                 cell_a.font = title_font
-            elif col1.endswith(":") and col1.isupper():
-                cell_a.font = section_font if "REQUIRED" in col1 or "OPTIONAL" in col1 else note_font
+            elif str(col1).endswith(":") and str(col1).isupper():
+                cell_a.font = section_font if "REQUIRED" in str(col1) or "OPTIONAL" in str(col1) else note_font
         
         # Set column widths for instructions
         instructions_ws.column_dimensions['A'].width = 35
