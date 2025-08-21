@@ -38,7 +38,7 @@ httpx
 aiohttp
 multidict
 attrs
--e yarl
+yarl
 aiosignal
 frozenlist
 aiohappyeyeballs
