@@ -8,6 +8,7 @@ import time
 import io
 import tempfile
 import os
+import re
 
 class HRSystemEnhancedSecurityTester:
     def __init__(self, base_url="https://data-import-tool-1.preview.emergentagent.com"):
