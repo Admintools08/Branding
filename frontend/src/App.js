@@ -1859,7 +1859,32 @@ const App = () => {
         onClose={() => setShowChangePassword(false)} 
       />
 
-      <Toaster position="top-right" />
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          duration: 4000,
+          style: {
+            borderRadius: '8px',
+            fontWeight: '500',
+          },
+          error: {
+            duration: 6000,
+            style: {
+              backgroundColor: '#fee2e2',
+              border: '1px solid #fecaca',
+              color: '#dc2626',
+              fontWeight: '600'
+            }
+          },
+          success: {
+            style: {
+              backgroundColor: '#ecfdf5',
+              border: '1px solid #bbf7d0',
+              color: '#059669'
+            }
+          }
+        }}
+      />
     </div>
   );
 };
