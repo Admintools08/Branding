@@ -317,6 +317,8 @@ const App = () => {
     e.preventDefault();
     try {
       setLoading(true);
+      setLoginError(false); // Clear any previous errors
+      
       const response = await axios.post(`${API}/auth/login`, {
         email: loginForm.email,
         password: loginForm.password
@@ -330,6 +332,7 @@ const App = () => {
       toast.success(`Welcome back, ${userData.name}! 🎉`);
     } catch (error) {
       playSound('error');
+      setLoginError(true); // Set error state for visual feedback
       
       // Enhanced error handling for better user experience
       let errorMessage = 'Login failed';
@@ -363,7 +366,14 @@ const App = () => {
         errorMessage = 'An unexpected error occurred. Please try again.';
       }
       
-      toast.error(errorMessage);
+      toast.error(errorMessage, {
+        duration: 5000, // Show error toast longer
+        style: {
+          backgroundColor: '#fee2e2',
+          border: '1px solid #fecaca',
+          color: '#dc2626'
+        }
+      });
     } finally {
       setLoading(false);
     }
