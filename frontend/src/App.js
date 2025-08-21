@@ -990,6 +990,14 @@ const App = () => {
               <Upload className="h-4 w-4 mr-2" />
               Import Excel
             </Button>
+            <Button 
+              onClick={() => downloadTemplate()} 
+              variant="outline" 
+              className="hover:bg-blue-50"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Download Template
+            </Button>
             <Button onClick={() => setIsAddDialogOpen(true)} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
               <UserPlus className="h-4 w-4 mr-2" />
               Add Ninja
