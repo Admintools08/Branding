@@ -1400,40 +1400,6 @@ async def get_tasks(
     tasks = await db.tasks.find(query).to_list(1000)
     return [Task(**parse_from_mongo(task)) for task in tasks]
 
-@api_router.put("/tasks/{task_id}", response_model=Task)
-async def update_task(
-    task_id: str,
-    update_data: TaskUpdate,
-    current_user: dict = Depends(auth_service.require_permission(Permission.UPDATE_TASK)),
-    request: Request = None
-):
-    task = await db.tasks.find_one({"id": task_id})
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    
-    update_dict = {k: v for k, v in update_data.dict().items() if v is not None}
-    update_dict["updated_at"] = datetime.now(timezone.utc)
-    
-    # Set completed_date if task is being marked as completed
-    if update_data.status == TaskStatus.COMPLETED and not update_data.completed_date:
-        update_dict["completed_date"] = datetime.now(timezone.utc)
-    
-    update_dict = prepare_for_mongo(update_dict)
-    await db.tasks.update_one({"id": task_id}, {"$set": update_dict})
-    
-    # Log action
-    client_info = await get_client_info(request)
-    await auth_service.log_action(
-        user_id=current_user["id"],
-        action="update_task",
-        resource="task",
-        details={"task_id": task_id, "updates": update_dict},
-        **client_info
-    )
-    
-    updated_task = await db.tasks.find_one({"id": task_id})
-    return Task(**parse_from_mongo(updated_task))
-
 @api_router.put("/tasks/bulk", response_model=dict)
 async def bulk_update_tasks(
     bulk_data: BulkTaskUpdate,
@@ -1476,6 +1442,40 @@ async def bulk_update_tasks(
         "updated_count": result.modified_count,
         "total_requested": len(bulk_data.task_ids)
     }
+
+@api_router.put("/tasks/{task_id}", response_model=Task)
+async def update_task(
+    task_id: str,
+    update_data: TaskUpdate,
+    current_user: dict = Depends(auth_service.require_permission(Permission.UPDATE_TASK)),
+    request: Request = None
+):
+    task = await db.tasks.find_one({"id": task_id})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    update_dict = {k: v for k, v in update_data.dict().items() if v is not None}
+    update_dict["updated_at"] = datetime.now(timezone.utc)
+    
+    # Set completed_date if task is being marked as completed
+    if update_data.status == TaskStatus.COMPLETED and not update_data.completed_date:
+        update_dict["completed_date"] = datetime.now(timezone.utc)
+    
+    update_dict = prepare_for_mongo(update_dict)
+    await db.tasks.update_one({"id": task_id}, {"$set": update_dict})
+    
+    # Log action
+    client_info = await get_client_info(request)
+    await auth_service.log_action(
+        user_id=current_user["id"],
+        action="update_task",
+        resource="task",
+        details={"task_id": task_id, "updates": update_dict},
+        **client_info
+    )
+    
+    updated_task = await db.tasks.find_one({"id": task_id})
+    return Task(**parse_from_mongo(updated_task))
 
 # AI Endpoints with enhanced permissions
 @api_router.post("/ai/analyze-employee")
