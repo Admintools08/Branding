@@ -342,6 +342,7 @@ const App = () => {
     try {
       setLoading(true);
       setLoginError(false); // Clear any previous errors
+      setLoginErrorMessage(''); // Clear error message
       
       const response = await axios.post(`${API}/auth/login`, {
         email: loginForm.email,
