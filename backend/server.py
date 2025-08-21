@@ -898,7 +898,8 @@ async def import_employees_from_excel(
         if file.filename.endswith('.csv'):
             df = pd.read_csv(temp_file_path)
         else:
-            df = pd.read_excel(temp_file_path)
+            # Explicitly use openpyxl engine for Excel files
+            df = pd.read_excel(temp_file_path, engine='openpyxl')
         
         # Validate required columns
         required_columns = ['Name', 'Employee ID', 'Email', 'Department', 'Manager', 'Start Date']
