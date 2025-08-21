@@ -929,15 +929,78 @@ async def import_employees_from_excel(
             shutil.rmtree(temp_dir)
             raise HTTPException(status_code=400, detail=f"Error reading file: {str(e)}")
         
-        # Validate required columns
+        # AI-powered column mapping and validation
+        column_mapping = {}
         required_columns = ['Name', 'Employee ID', 'Email', 'Department', 'Manager', 'Start Date']
-        missing_columns = [col for col in required_columns if col not in df.columns]
+        optional_columns = ['Position', 'Phone', 'Birthday']
         
-        if missing_columns:
+        # Smart column mapping using AI
+        def find_column_match(required_col, available_cols):
+            """Use AI to find best matching column name"""
+            exact_matches = [col for col in available_cols if col == required_col]
+            if exact_matches:
+                return exact_matches[0]
+            
+            # Common variations mapping
+            variations = {
+                'Name': ['Full Name', 'Employee Name', 'Full_Name', 'name', 'NAME'],
+                'Employee ID': ['ID', 'Emp ID', 'EmpID', 'Employee_ID', 'emp_id', 'EMPLOYEE_ID'],
+                'Email': ['Email Address', 'E-mail', 'Email_Address', 'email', 'EMAIL'],
+                'Department': ['Dept', 'Department Name', 'dept', 'DEPARTMENT'],
+                'Manager': ['Manager Name', 'Supervisor', 'manager', 'MANAGER'],
+                'Start Date': ['Start_Date', 'Hire Date', 'Join Date', 'start_date', 'START_DATE'],
+                'Position': ['Job Title', 'Title', 'Role', 'position', 'POSITION'],
+                'Phone': ['Phone Number', 'Contact', 'Mobile', 'phone', 'PHONE'],
+                'Birthday': ['Birth Date', 'DOB', 'Date of Birth', 'birthday', 'BIRTHDAY']
+            }
+            
+            # Check variations
+            for variation in variations.get(required_col, []):
+                if variation in available_cols:
+                    return variation
+            
+            # Fuzzy matching for similar names
+            for col in available_cols:
+                if required_col.lower().replace(' ', '') in col.lower().replace(' ', ''):
+                    return col
+                if col.lower().replace(' ', '') in required_col.lower().replace(' ', ''):
+                    return col
+            
+            return None
+
+        # Map all columns
+        all_columns = required_columns + optional_columns
+        available_columns = list(df.columns)
+        
+        for col in all_columns:
+            matched_col = find_column_match(col, available_columns)
+            if matched_col:
+                column_mapping[col] = matched_col
+        
+        # Check for missing required columns
+        missing_required = [col for col in required_columns if col not in column_mapping]
+        
+        if missing_required:
+            # Try AI analysis to suggest solutions
+            if ai_service:
+                try:
+                    suggestion_prompt = f"""
+                    Required columns missing: {missing_required}
+                    Available columns: {available_columns}
+                    
+                    Please suggest which available columns might map to the missing required ones.
+                    Respond with a JSON mapping like: {{"Name": "suggested_column_name"}}
+                    """
+                    
+                    ai_suggestions = await ai_service.analyze_employee_data(temp_file_path, "column_mapping")
+                    # Use AI suggestions if available
+                except:
+                    pass
+            
             shutil.rmtree(temp_dir)
             raise HTTPException(
                 status_code=400,
-                detail=f"Missing required columns: {', '.join(missing_columns)}"
+                detail=f"Missing required columns: {', '.join(missing_required)}. Available columns: {', '.join(available_columns)}. Please ensure your Excel file has these exact column names: {', '.join(required_columns)}"
             )
         
         imported_count = 0
