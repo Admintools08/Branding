@@ -2110,6 +2110,7 @@ const App = () => {
             employees={employees}
             onUpdateTask={updateTaskStatus}
             onDownloadReport={downloadReport}
+            playSound={playSound}
           />
         )}
         {currentView === 'admin' && canAccessAdminPanel(user?.role) && (
