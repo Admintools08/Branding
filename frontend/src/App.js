@@ -1808,7 +1808,13 @@ const App = () => {
   }
 
   if (!user) {
-    return <LoginForm />;
+    return <LoginForm 
+      loginForm={loginForm}
+      setLoginForm={setLoginForm}
+      handleLogin={handleLogin}
+      loading={loading}
+      setShowForgotPassword={setShowForgotPassword}
+    />;
   }
 
   return (
