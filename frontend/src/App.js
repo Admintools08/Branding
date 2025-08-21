@@ -1845,6 +1845,7 @@ const App = () => {
       loading={loading}
       onShowForgotPassword={handleShowForgotPassword}
       hasError={loginError}
+      errorMessage={loginErrorMessage}
     />;
   }
 
