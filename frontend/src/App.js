@@ -1443,7 +1443,8 @@ const App = () => {
       const taskCount = selectedTasks.size;
       const statusText = action === 'completed' ? 'completed' : 'pending';
       
-      // Show loading state
+      // Set loading state
+      setIsBulkLoading(true);
       const loadingToast = toast.loading(`Updating ${taskCount} tasks...`);
       
       try {
@@ -1468,6 +1469,7 @@ const App = () => {
         
         // Dismiss loading toast
         toast.dismiss(loadingToast);
+        setIsBulkLoading(false);
         
         // Show appropriate feedback
         if (successful === taskCount) {
@@ -1482,8 +1484,9 @@ const App = () => {
         }
         
       } catch (error) {
-        // Dismiss loading toast
+        // Dismiss loading toast and reset loading state
         toast.dismiss(loadingToast);
+        setIsBulkLoading(false);
         
         playSound('error');
         toast.error('Failed to update tasks. Please try again.');
