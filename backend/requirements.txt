@@ -38,3 +38,8 @@ httpx
 aiohttp
 multidict
 attrs
+-e yarl
+aiosignal
+frozenlist
+aiohappyeyeballs
+propcache
