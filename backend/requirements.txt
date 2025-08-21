@@ -47,3 +47,4 @@ openai
 distro
 jiter
 tqdm
+python-http-client==3.3.7
