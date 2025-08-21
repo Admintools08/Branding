@@ -223,6 +223,7 @@ const App = () => {
   });
   
   const [loginError, setLoginError] = useState(false);
+  const [loginErrorMessage, setLoginErrorMessage] = useState('');
 
   // Sound effects
   const playSound = (type = 'click') => {
