@@ -102,7 +102,33 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Fix profile-related issues: 1. 0 Year Anniversary should show joining date, 2. Position and phone number not being saved in profile, 3. Remove emergency number field as it's not required"
+user_problem_statement: "Add a click and download button on employee page which can download the template in with data can be imported. excel format."
+
+backend:
+  - task: "Excel Template Download API"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "main"
+          comment: "Created new API endpoint '/employees/download-template' that generates a professional Excel template with headers, sample data, styling, data validation, and instructions. Template includes required fields (Name, Employee ID, Email, Department, Manager, Start Date) and optional fields (Position, Phone, Birthday) with proper formatting and sample data rows."
+
+frontend:
+  - task: "Download Template Button UI"
+    implemented: true
+    working: false
+    file: "App.js"
+    stuck_count: 0
+    priority: "high" 
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "main"
+          comment: "Added 'Download Template' button to employee management page next to 'Import Excel' button. Implemented downloadTemplate function with proper file download, error handling, and user feedback via toast notifications. Button styled with FileText icon and blue hover effect."
 
 backend:
   - task: "Profile Fields Fix - Position and Phone"
