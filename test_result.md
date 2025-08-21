@@ -557,7 +557,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Excel Template Download API"
+    - "Enhanced Mission Control with Multiple Select and Filtering"
     - "Download Template Button UI"
   stuck_tasks: []
   test_all: false
