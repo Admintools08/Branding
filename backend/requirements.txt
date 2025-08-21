@@ -43,3 +43,7 @@ aiosignal
 frozenlist
 aiohappyeyeballs
 propcache
+-e openai
+distro
+jiter
+tqdm
