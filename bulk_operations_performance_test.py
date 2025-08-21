@@ -67,10 +67,10 @@ class BulkOperationsPerformanceTester:
 
     def authenticate(self):
         """Authenticate with admin credentials"""
-        # Try different admin credentials
+        # Try different admin credentials based on test_result.md
         credentials = [
-            {"email": "admin@test.com", "password": "admin123"},
-            {"email": "admin@brandingpioneers.com", "password": "SuperAdmin2024!"}
+            {"email": "admin@brandingpioneers.com", "password": "SuperAdmin2024!"},
+            {"email": "admin@test.com", "password": "admin123"}
         ]
         
         for cred in credentials:
