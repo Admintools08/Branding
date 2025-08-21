@@ -1472,37 +1472,129 @@ const App = () => {
               Mission Control 🎯
             </h2>
             <p className="text-gray-600 mt-1">Track and manage ninja missions</p>
+            {selectedTasks.size > 0 && (
+              <div className="mt-2">
+                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                  {selectedTasks.size} task{selectedTasks.size !== 1 ? 's' : ''} selected
+                </Badge>
+              </div>
+            )}
           </div>
-          <Button variant="outline" onClick={() => onDownloadReport('tasks')} className="hover:bg-purple-50">
-            <Download className="h-4 w-4 mr-2" />
-            Export Tasks
-          </Button>
+          <div className="flex items-center space-x-2">
+            {selectedTasks.size > 0 && (
+              <div className="flex items-center space-x-2 mr-4">
+                <Button 
+                  onClick={() => handleBulkAction('completed')}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  size="sm"
+                >
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  Mark Complete ({selectedTasks.size})
+                </Button>
+                <Button 
+                  onClick={() => handleBulkAction('pending')}
+                  variant="outline"
+                  className="border-orange-300 text-orange-700 hover:bg-orange-50"
+                  size="sm"
+                >
+                  <Clock className="h-4 w-4 mr-1" />
+                  Mark Pending ({selectedTasks.size})
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setSelectedTasks(new Set());
+                    setIsSelectAllChecked(false);
+                    playSound('click');
+                  }}
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Clear
+                </Button>
+              </div>
+            )}
+            <Button variant="outline" onClick={() => onDownloadReport('tasks')} className="hover:bg-purple-50">
+              <Download className="h-4 w-4 mr-2" />
+              Export Tasks
+            </Button>
+          </div>
         </div>
 
-        {/* Search and Filter */}
-        <div className="flex space-x-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Search missions..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+        {/* Enhanced Search and Filter Controls */}
+        <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-4">
+          {/* Top row: Search and Select All */}
+          <div className="flex items-center space-x-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search missions by title..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            {filteredTasks.length > 0 && (
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  checked={isSelectAllChecked}
+                  onCheckedChange={handleSelectAll}
+                  id="select-all"
+                />
+                <Label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
+                  Select All ({filteredTasks.length})
+                </Label>
+              </div>
+            )}
           </div>
-          <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filter tasks" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Tasks</SelectItem>
-              <SelectItem value="pending">📋 Pending</SelectItem>
-              <SelectItem value="in_progress">⏳ In Progress</SelectItem>
-              <SelectItem value="completed">✅ Completed</SelectItem>
-              <SelectItem value="onboarding">🚀 Onboarding</SelectItem>
-              <SelectItem value="exit">👋 Exit</SelectItem>
-            </SelectContent>
-          </Select>
+          
+          {/* Bottom row: Filters */}
+          <div className="flex space-x-4">
+            <Select value={filter} onValueChange={setFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="pending">📋 Pending</SelectItem>
+                <SelectItem value="in_progress">⏳ In Progress</SelectItem>
+                <SelectItem value="completed">✅ Completed</SelectItem>
+                <SelectItem value="onboarding">🚀 Onboarding</SelectItem>
+                <SelectItem value="exit">👋 Exit</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={nameFilter} onValueChange={setNameFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filter by ninja" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Ninjas</SelectItem>
+                {availableEmployees.map(employee => (
+                  <SelectItem key={employee.id} value={employee.id}>
+                    👤 {employee.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            {(filter !== 'all' || nameFilter !== 'all' || searchTerm) && (
+              <Button 
+                variant="ghost" 
+                onClick={() => {
+                  setFilter('all');
+                  setNameFilter('all');
+                  setSearchTerm('');
+                  playSound('click');
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Clear Filters
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Tasks by Type */}
