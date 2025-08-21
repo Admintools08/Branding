@@ -68,13 +68,22 @@ class ExcelImportTester:
 
     def login_admin(self):
         """Login with admin credentials"""
-        # Try admin@test.com first (from test_result.md)
+        # Try admin@brandingpioneers.com first (from init_admin.py)
         success, status, data = self.make_request(
             'POST',
             'auth/login',
-            {"email": "admin@test.com", "password": "admin123"},
+            {"email": "admin@brandingpioneers.com", "password": "SuperAdmin2024!"},
             expected_status=200
         )
+        
+        # If that fails, try admin@test.com (from test_result.md)
+        if not success:
+            success, status, data = self.make_request(
+                'POST',
+                'auth/login',
+                {"email": "admin@test.com", "password": "admin123"},
+                expected_status=200
+            )
         
         if success and 'access_token' in data:
             self.token = data['access_token']
