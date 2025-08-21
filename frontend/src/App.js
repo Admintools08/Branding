@@ -198,6 +198,8 @@ const App = () => {
     password: '',
     showPassword: false
   });
+  
+  const [loginError, setLoginError] = useState(false);
 
   // Sound effects
   const playSound = (type = 'click') => {
