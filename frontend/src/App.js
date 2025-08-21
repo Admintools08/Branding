@@ -122,7 +122,9 @@ const LoginForm = React.memo(({
                 placeholder="Enter your password"
                 value={loginForm.password}
                 onChange={onPasswordChange}
-                className="pl-10 pr-10 border-gray-300 focus:border-purple-500"
+                className={`pl-10 pr-10 ${hasError 
+                  ? 'border-red-300 focus:border-red-500' 
+                  : 'border-gray-300 focus:border-purple-500'}`}
                 required
               />
               <button
