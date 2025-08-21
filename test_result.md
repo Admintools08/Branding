@@ -595,9 +595,7 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Bulk Task Update Optimization"
-    - "Optimized Bulk Task Operations"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
