@@ -105,6 +105,18 @@
 user_problem_statement: "test and make the whole code and system more efficient and smooth. Test and analyse. also fix if bulk task is marked complete then it hangs breaks. so make it smooth"
 
 backend:
+  - task: "Bulk Task Update Optimization"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "main"
+          comment: "PERFORMANCE OPTIMIZATION IMPLEMENTED: Added new bulk task update endpoint PUT /tasks/bulk that uses MongoDB's update_many() for efficient bulk operations. This replaces individual task updates to prevent the hanging issue. New endpoint accepts task_ids array and status, performs single atomic database operation, includes proper audit logging, and returns success count. Also added BulkTaskUpdate model for request validation."
+
   - task: "Excel Template Download API"
     implemented: true
     working: true
