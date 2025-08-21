@@ -195,6 +195,10 @@ class TaskUpdate(BaseModel):
     due_date: Optional[datetime] = None
     completed_date: Optional[datetime] = None
 
+class BulkTaskUpdate(BaseModel):
+    task_ids: List[str]
+    status: TaskStatus
+
 class BulkNotification(BaseModel):
     recipient_emails: List[EmailStr]
     subject: str
