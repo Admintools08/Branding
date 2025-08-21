@@ -32,7 +32,7 @@ try:
 except ImportError:
     EXCEL_ENGINE_AVAILABLE = False
     print("WARNING: openpyxl not available, Excel import will be limited")
-from ai_service import HRAIService
+# from ai_service import HRAIService  # Temporarily disabled to fix auth issue
 from auth_service import AuthService, UserRole, Permission, UserInvitation, PasswordResetToken, EmailVerification, AuditLog
 from email_service import email_service
 
