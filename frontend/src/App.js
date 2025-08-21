@@ -2168,6 +2168,7 @@ const App = () => {
             employees={employees}
             onUpdateTask={updateTaskStatus}
             onUpdateTaskBulk={updateTaskStatusBulk}
+            onBulkUpdateTasks={bulkUpdateTasks}
             onLoadData={loadData}
             onDownloadReport={downloadReport}
             playSound={playSound}
