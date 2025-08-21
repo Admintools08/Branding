@@ -576,6 +576,7 @@ const App = () => {
     }
   };
 
+  // Single task update - reloads data immediately
   const updateTaskStatus = async (taskId, status) => {
     try {
       await axios.put(`${API}/tasks/${taskId}`, { status }, {
@@ -589,6 +590,13 @@ const App = () => {
       toast.error('Failed to update task');
       console.error('Error updating task:', error);
     }
+  };
+
+  // Bulk-friendly task update - doesn't reload data (for use in bulk operations)
+  const updateTaskStatusBulk = async (taskId, status) => {
+    return axios.put(`${API}/tasks/${taskId}`, { status }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
   };
 
   const downloadReport = async (type) => {
