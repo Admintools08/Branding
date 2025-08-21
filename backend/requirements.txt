@@ -37,3 +37,4 @@ litellm
 httpx
 aiohttp
 multidict
+attrs
