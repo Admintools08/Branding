@@ -1006,6 +1006,422 @@ Security Test User,SEC2024001,security.test@brandingpioneers.com,Security,Admin 
             "Test data cleanup completed"
         )
 
+    # ============================================================================
+    # EXCEL TEMPLATE DOWNLOAD TESTS
+    # ============================================================================
+
+    def test_excel_template_download_authentication(self):
+        """Test that Excel template download requires valid JWT authentication"""
+        # Save current token
+        original_token = self.token
+        
+        # Test without token
+        self.token = None
+        success, status, data = self.make_request(
+            'GET', 
+            'employees/download-template',
+            expected_status=401
+        )
+        
+        # Test with invalid token
+        self.token = "invalid.jwt.token"
+        success2, status2, data2 = self.make_request(
+            'GET', 
+            'employees/download-template',
+            expected_status=401
+        )
+        
+        # Restore token
+        self.token = original_token
+        
+        return self.log_test(
+            "Excel template download authentication",
+            success and success2,
+            f"Properly rejected unauthenticated (401) and invalid token (401) requests"
+        )
+
+    def test_excel_template_download_with_valid_auth(self):
+        """Test Excel template download with valid authentication"""
+        if not self.token:
+            return self.log_test("Excel template download with valid auth", False, "No token available")
+        
+        # Make request to download template
+        url = f"{self.api_url}/employees/download-template"
+        headers = {'Authorization': f'Bearer {self.token}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=15)
+            success = response.status_code == 200
+            
+            if success:
+                # Check content type
+                content_type = response.headers.get('content-type', '')
+                expected_content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                correct_content_type = expected_content_type in content_type
+                
+                # Check content disposition header
+                content_disposition = response.headers.get('content-disposition', '')
+                has_attachment = 'attachment' in content_disposition
+                has_filename = 'employee_import_template_' in content_disposition
+                has_xlsx_extension = '.xlsx' in content_disposition
+                
+                # Check file size (should be reasonable for Excel file)
+                content_length = len(response.content)
+                reasonable_size = 5000 < content_length < 100000  # Between 5KB and 100KB
+                
+                details = f"Content-Type: {correct_content_type}, Disposition: {has_attachment}, Filename: {has_filename}, Extension: {has_xlsx_extension}, Size: {content_length} bytes"
+                
+                return self.log_test(
+                    "Excel template download with valid auth",
+                    success and correct_content_type and has_attachment and has_filename and has_xlsx_extension and reasonable_size,
+                    details
+                )
+            else:
+                return self.log_test(
+                    "Excel template download with valid auth",
+                    False,
+                    f"Status: {response.status_code}, Response: {response.text[:200]}"
+                )
+                
+        except Exception as e:
+            return self.log_test(
+                "Excel template download with valid auth",
+                False,
+                f"Request failed: {str(e)}"
+            )
+
+    def test_excel_template_file_structure(self):
+        """Test that the downloaded Excel template has proper structure and content"""
+        if not self.token:
+            return self.log_test("Excel template file structure", False, "No token available")
+        
+        try:
+            # Download the template
+            url = f"{self.api_url}/employees/download-template"
+            headers = {'Authorization': f'Bearer {self.token}'}
+            response = requests.get(url, headers=headers, timeout=15)
+            
+            if response.status_code != 200:
+                return self.log_test(
+                    "Excel template file structure",
+                    False,
+                    f"Failed to download template: {response.status_code}"
+                )
+            
+            # Save to temporary file and analyze
+            import tempfile
+            import openpyxl
+            
+            with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as temp_file:
+                temp_file.write(response.content)
+                temp_file_path = temp_file.name
+            
+            try:
+                # Load workbook
+                wb = openpyxl.load_workbook(temp_file_path)
+                
+                # Check sheets
+                sheet_names = wb.sheetnames
+                has_template_sheet = 'Employee Template' in sheet_names
+                has_instructions_sheet = 'Instructions' in sheet_names
+                
+                # Check template sheet structure
+                template_ws = wb['Employee Template'] if has_template_sheet else None
+                required_headers = ["Name", "Employee ID", "Email", "Department", "Manager", "Start Date"]
+                optional_headers = ["Position", "Phone", "Birthday"]
+                
+                headers_correct = False
+                has_sample_data = False
+                has_styling = False
+                
+                if template_ws:
+                    # Check headers in first row
+                    first_row = [cell.value for cell in template_ws[1]]
+                    headers_correct = all(header in first_row for header in required_headers)
+                    optional_headers_present = all(header in first_row for header in optional_headers)
+                    
+                    # Check for sample data (should have at least 2-3 rows of data)
+                    has_sample_data = template_ws.max_row >= 4  # Header + 3 sample rows
+                    
+                    # Check for basic styling (colors, borders)
+                    header_cell = template_ws['A1']
+                    has_styling = (header_cell.fill.start_color.index != '00000000' or 
+                                 header_cell.font.bold or 
+                                 header_cell.border.top.style is not None)
+                
+                # Check instructions sheet content
+                instructions_content = False
+                if has_instructions_sheet:
+                    instructions_ws = wb['Instructions']
+                    instructions_content = instructions_ws.max_row > 10  # Should have substantial content
+                
+                # Clean up
+                os.unlink(temp_file_path)
+                wb.close()
+                
+                details = f"Sheets: Template({has_template_sheet}), Instructions({has_instructions_sheet}), Headers({headers_correct}), Optional({optional_headers_present}), Sample Data({has_sample_data}), Styling({has_styling}), Instructions Content({instructions_content})"
+                
+                return self.log_test(
+                    "Excel template file structure",
+                    has_template_sheet and has_instructions_sheet and headers_correct and optional_headers_present and has_sample_data and has_styling and instructions_content,
+                    details
+                )
+                
+            except Exception as e:
+                # Clean up on error
+                if os.path.exists(temp_file_path):
+                    os.unlink(temp_file_path)
+                return self.log_test(
+                    "Excel template file structure",
+                    False,
+                    f"Error analyzing Excel file: {str(e)}"
+                )
+                
+        except Exception as e:
+            return self.log_test(
+                "Excel template file structure",
+                False,
+                f"Error downloading or processing template: {str(e)}"
+            )
+
+    def test_excel_template_data_validation(self):
+        """Test that the Excel template includes data validation features"""
+        if not self.token:
+            return self.log_test("Excel template data validation", False, "No token available")
+        
+        try:
+            # Download the template
+            url = f"{self.api_url}/employees/download-template"
+            headers = {'Authorization': f'Bearer {self.token}'}
+            response = requests.get(url, headers=headers, timeout=15)
+            
+            if response.status_code != 200:
+                return self.log_test(
+                    "Excel template data validation",
+                    False,
+                    f"Failed to download template: {response.status_code}"
+                )
+            
+            # Save to temporary file and analyze
+            import tempfile
+            import openpyxl
+            
+            with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as temp_file:
+                temp_file.write(response.content)
+                temp_file_path = temp_file.name
+            
+            try:
+                # Load workbook
+                wb = openpyxl.load_workbook(temp_file_path)
+                template_ws = wb['Employee Template']
+                
+                # Check for data validation (dropdown for Department field)
+                has_data_validation = len(template_ws.data_validations.dataValidation) > 0
+                
+                # Check if Department column (D) has validation
+                dept_validation_found = False
+                for dv in template_ws.data_validations.dataValidation:
+                    if 'D' in str(dv.sqref):  # Department column
+                        dept_validation_found = True
+                        break
+                
+                # Check column widths are set (professional formatting)
+                has_column_widths = any(
+                    template_ws.column_dimensions[col].width and template_ws.column_dimensions[col].width > 10
+                    for col in ['A', 'B', 'C', 'D', 'E', 'F']
+                )
+                
+                # Clean up
+                os.unlink(temp_file_path)
+                wb.close()
+                
+                details = f"Data Validation: {has_data_validation}, Department Dropdown: {dept_validation_found}, Column Widths: {has_column_widths}"
+                
+                return self.log_test(
+                    "Excel template data validation",
+                    has_data_validation and dept_validation_found and has_column_widths,
+                    details
+                )
+                
+            except Exception as e:
+                # Clean up on error
+                if os.path.exists(temp_file_path):
+                    os.unlink(temp_file_path)
+                return self.log_test(
+                    "Excel template data validation",
+                    False,
+                    f"Error analyzing Excel validation: {str(e)}"
+                )
+                
+        except Exception as e:
+            return self.log_test(
+                "Excel template data validation",
+                False,
+                f"Error processing template: {str(e)}"
+            )
+
+    def test_excel_template_filename_format(self):
+        """Test that the Excel template filename follows the correct format"""
+        if not self.token:
+            return self.log_test("Excel template filename format", False, "No token available")
+        
+        try:
+            # Download the template
+            url = f"{self.api_url}/employees/download-template"
+            headers = {'Authorization': f'Bearer {self.token}'}
+            response = requests.get(url, headers=headers, timeout=15)
+            
+            if response.status_code != 200:
+                return self.log_test(
+                    "Excel template filename format",
+                    False,
+                    f"Failed to download template: {response.status_code}"
+                )
+            
+            # Check content disposition header for filename
+            content_disposition = response.headers.get('content-disposition', '')
+            
+            # Expected format: employee_import_template_YYYYMMDD.xlsx
+            import re
+            from datetime import datetime
+            
+            # Extract filename from content-disposition
+            filename_match = re.search(r'filename="([^"]+)"', content_disposition)
+            if not filename_match:
+                return self.log_test(
+                    "Excel template filename format",
+                    False,
+                    f"No filename found in content-disposition: {content_disposition}"
+                )
+            
+            filename = filename_match.group(1)
+            
+            # Check filename format
+            today = datetime.now().strftime('%Y%m%d')
+            expected_pattern = f"employee_import_template_{today}.xlsx"
+            correct_format = filename == expected_pattern
+            
+            # Also check if it's a valid date format (in case of timezone differences)
+            date_pattern = re.match(r'employee_import_template_(\d{8})\.xlsx', filename)
+            valid_date_format = date_pattern is not None
+            
+            if date_pattern:
+                date_str = date_pattern.group(1)
+                try:
+                    datetime.strptime(date_str, '%Y%m%d')
+                    valid_date = True
+                except:
+                    valid_date = False
+            else:
+                valid_date = False
+            
+            details = f"Filename: {filename}, Expected: {expected_pattern}, Valid Format: {valid_date_format}, Valid Date: {valid_date}"
+            
+            return self.log_test(
+                "Excel template filename format",
+                valid_date_format and valid_date,
+                details
+            )
+            
+        except Exception as e:
+            return self.log_test(
+                "Excel template filename format",
+                False,
+                f"Error checking filename format: {str(e)}"
+            )
+
+    def test_excel_template_action_logging(self):
+        """Test that template downloads are properly logged"""
+        if not self.token:
+            return self.log_test("Excel template action logging", False, "No token available")
+        
+        try:
+            # Get initial audit log count
+            initial_success, initial_status, initial_logs = self.make_request(
+                'GET', 
+                'admin/audit-logs',
+                expected_status=200
+            )
+            
+            initial_count = len(initial_logs) if initial_success else 0
+            
+            # Download template to trigger logging
+            url = f"{self.api_url}/employees/download-template"
+            headers = {'Authorization': f'Bearer {self.token}'}
+            response = requests.get(url, headers=headers, timeout=15)
+            
+            if response.status_code != 200:
+                return self.log_test(
+                    "Excel template action logging",
+                    False,
+                    f"Template download failed: {response.status_code}"
+                )
+            
+            # Wait a moment for logging to complete
+            time.sleep(1)
+            
+            # Get updated audit logs
+            final_success, final_status, final_logs = self.make_request(
+                'GET', 
+                'admin/audit-logs',
+                expected_status=200
+            )
+            
+            if not final_success:
+                return self.log_test(
+                    "Excel template action logging",
+                    False,
+                    f"Failed to retrieve audit logs: {final_status}"
+                )
+            
+            final_count = len(final_logs)
+            log_created = final_count > initial_count
+            
+            # Check if the latest log entry is for template download
+            download_log_found = False
+            if final_logs and len(final_logs) > 0:
+                latest_log = final_logs[0]  # Assuming logs are sorted by timestamp desc
+                if (latest_log.get('action') == 'download_template' and 
+                    latest_log.get('resource') == 'employee'):
+                    download_log_found = True
+            
+            details = f"Initial logs: {initial_count}, Final logs: {final_count}, Log created: {log_created}, Download log found: {download_log_found}"
+            
+            return self.log_test(
+                "Excel template action logging",
+                log_created and download_log_found,
+                details
+            )
+            
+        except Exception as e:
+            return self.log_test(
+                "Excel template action logging",
+                False,
+                f"Error testing action logging: {str(e)}"
+            )
+
+    def run_excel_template_download_tests(self):
+        """Run all Excel template download tests"""
+        print("\n📊 Excel Template Download Feature Tests:")
+        
+        # Test authentication and access control
+        self.test_excel_template_download_authentication()
+        
+        # Test successful download with valid auth
+        self.test_excel_template_download_with_valid_auth()
+        
+        # Test file structure and content
+        self.test_excel_template_file_structure()
+        
+        # Test data validation features
+        self.test_excel_template_data_validation()
+        
+        # Test filename format
+        self.test_excel_template_filename_format()
+        
+        # Test action logging
+        self.test_excel_template_action_logging()
+
     def run_all_tests(self):
         """Run all enhanced security tests in sequence"""
         print("🚀 Starting Branding Pioneers HR System - Enhanced Security Tests")
