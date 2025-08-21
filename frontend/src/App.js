@@ -62,8 +62,16 @@ import './App.css';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Login Form Component (moved outside App to prevent re-creation on renders)
-const LoginForm = ({ loginForm, setLoginForm, handleLogin, loading, setShowForgotPassword }) => (
+// Login Form Component (moved outside App and optimized to prevent re-renders)
+const LoginForm = React.memo(({ 
+  loginForm, 
+  onEmailChange, 
+  onPasswordChange, 
+  onTogglePasswordVisibility,
+  handleLogin, 
+  loading, 
+  onShowForgotPassword 
+}) => (
   <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4">
     <div className="absolute inset-0 opacity-20 bg-gray-900"></div>
     
@@ -92,7 +100,7 @@ const LoginForm = ({ loginForm, setLoginForm, handleLogin, loading, setShowForgo
                 type="email"
                 placeholder="your.email@company.com"
                 value={loginForm.email}
-                onChange={(e) => setLoginForm({...loginForm, email: e.target.value})}
+                onChange={onEmailChange}
                 className="pl-10 border-gray-300 focus:border-purple-500"
                 required
               />
@@ -110,14 +118,14 @@ const LoginForm = ({ loginForm, setLoginForm, handleLogin, loading, setShowForgo
                 type={loginForm.showPassword ? 'text' : 'password'}
                 placeholder="Enter your password"
                 value={loginForm.password}
-                onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                onChange={onPasswordChange}
                 className="pl-10 pr-10 border-gray-300 focus:border-purple-500"
                 required
               />
               <button
                 type="button"
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                onClick={() => setLoginForm({...loginForm, showPassword: !loginForm.showPassword})}
+                onClick={onTogglePasswordVisibility}
               >
                 {loginForm.showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -127,7 +135,7 @@ const LoginForm = ({ loginForm, setLoginForm, handleLogin, loading, setShowForgo
           <div className="flex items-center justify-between text-sm">
             <button
               type="button"
-              onClick={() => setShowForgotPassword(true)}
+              onClick={onShowForgotPassword}
               className="text-purple-600 hover:text-purple-800 font-medium"
             >
               Forgot Password?
@@ -163,10 +171,10 @@ const LoginForm = ({ loginForm, setLoginForm, handleLogin, loading, setShowForgo
 
     <ForgotPasswordForm 
       isOpen={false} 
-      onClose={() => setShowForgotPassword(false)} 
+      onClose={() => {}} 
     />
   </div>
-);
+));
 
 const App = () => {
   const [user, setUser] = useState(null);
