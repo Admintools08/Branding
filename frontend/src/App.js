@@ -1368,7 +1368,7 @@ const App = () => {
   };
 
   // Task Management Component  
-  const TaskManagement = ({ tasks, employees, onUpdateTask, onDownloadReport }) => {
+  const TaskManagement = ({ tasks, employees, onUpdateTask, onDownloadReport, playSound }) => {
     const [filter, setFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [nameFilter, setNameFilter] = useState('all');
