@@ -346,6 +346,23 @@ const App = () => {
     toast.success('Logged out successfully');
   };
 
+  // Optimized handlers to prevent unnecessary re-renders
+  const handleEmailChange = useCallback((e) => {
+    setLoginForm(prev => ({ ...prev, email: e.target.value }));
+  }, []);
+
+  const handlePasswordChange = useCallback((e) => {
+    setLoginForm(prev => ({ ...prev, password: e.target.value }));
+  }, []);
+
+  const handleTogglePasswordVisibility = useCallback(() => {
+    setLoginForm(prev => ({ ...prev, showPassword: !prev.showPassword }));
+  }, []);
+
+  const handleShowForgotPassword = useCallback(() => {
+    setShowForgotPassword(true);
+  }, []);
+
   const getUserRoleColor = (role) => {
     const colors = {
       super_admin: 'bg-purple-100 text-purple-800 border-purple-200',
