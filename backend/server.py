@@ -24,6 +24,14 @@ import io
 import pandas as pd
 import tempfile
 import shutil
+
+# Explicitly import openpyxl to ensure it's available
+try:
+    import openpyxl
+    EXCEL_ENGINE_AVAILABLE = True
+except ImportError:
+    EXCEL_ENGINE_AVAILABLE = False
+    print("WARNING: openpyxl not available, Excel import will be limited")
 from ai_service import HRAIService
 from auth_service import AuthService, UserRole, Permission, UserInvitation, PasswordResetToken, EmailVerification, AuditLog
 from email_service import email_service
