@@ -62,6 +62,118 @@ import './App.css';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Login Form Component (moved outside App to prevent re-creation on renders)
+const LoginForm = ({ loginForm, setLoginForm, handleLogin, loading, setShowForgotPassword }) => (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4">
+    <div className="absolute inset-0 opacity-20 bg-gray-900"></div>
+    
+    <Card className="w-full max-w-md bg-white/95 backdrop-blur-sm shadow-2xl border-0">
+      <CardHeader className="text-center pb-2">
+        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+          <Rocket className="w-8 h-8 text-white" />
+        </div>
+        <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Digital Ninjas
+        </CardTitle>
+        <p className="text-gray-600 text-sm">
+          Branding Pioneers - HR Command Center
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+              Email Address
+            </Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                id="email"
+                type="email"
+                placeholder="your.email@company.com"
+                value={loginForm.email}
+                onChange={(e) => {
+                  console.log('Email onChange:', e.target.value);
+                  setLoginForm({...loginForm, email: e.target.value});
+                }}
+                className="pl-10 border-gray-300 focus:border-purple-500"
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+              Password
+            </Label>
+            <div className="relative">
+              <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                id="password"
+                type={loginForm.showPassword ? 'text' : 'password'}
+                placeholder="Enter your password"
+                value={loginForm.password}
+                onChange={(e) => {
+                  console.log('Password onChange:', e.target.value.length);
+                  setLoginForm({...loginForm, password: e.target.value});
+                }}
+                className="pl-10 pr-10 border-gray-300 focus:border-purple-500"
+                required
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                onClick={() => setLoginForm({...loginForm, showPassword: !loginForm.showPassword})}
+              >
+                {loginForm.showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-sm">
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="text-purple-600 hover:text-purple-800 font-medium"
+            >
+              Forgot Password?
+            </button>
+          </div>
+
+          <Button 
+            type="submit" 
+            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-2.5 shadow-lg transform transition hover:scale-[1.02]"
+            disabled={loading}
+          >
+            {loading ? (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Signing In...
+              </div>
+            ) : (
+              <div className="flex items-center justify-center">
+                <Zap className="w-4 h-4 mr-2" />
+                Access Ninja HQ
+              </div>
+            )}
+          </Button>
+        </form>
+
+        <div className="text-center">
+          <p className="text-xs text-gray-500">
+            🥷 Empowering teams with ninja-level efficiency
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+
+    <ForgotPasswordForm 
+      isOpen={false} 
+      onClose={() => setShowForgotPassword(false)} 
+    />
+  </div>
+);
+
 const App = () => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
