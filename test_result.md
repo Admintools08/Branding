@@ -511,7 +511,7 @@ test_plan:
 
 agent_communication:
     - agent: "main"
-      message: "Fixed three critical profile-related issues: 1. Added position and phone fields to backend Employee models and profile update endpoint, 2. Removed emergency_contact field from frontend forms, 3. Fixed anniversary display to show 'Joining Date Anniversary' for 0 years instead of '0 Year Anniversary'. Backend services restarted successfully. Ready for testing to verify all fixes work correctly."
+      message: "Implemented Excel template download feature as requested by user: 1. BACKEND: Created '/employees/download-template' API endpoint that generates professional Excel template with required/optional headers, sample data, styling, data validation dropdowns, and instruction sheet. 2. FRONTEND: Added 'Download Template' button next to Import Excel button with proper download functionality, error handling, and user feedback. Ready for testing to verify the complete download template workflow."
     - agent: "main"
       message: "EXCEL IMPORT ISSUE RESOLVED: User reported 'Missing optional dependency openpyxl' error. Verified openpyxl 3.1.5 is properly installed and working. Restarted backend service to ensure proper library loading. Excel import functionality is now fully operational."
     - agent: "testing"
