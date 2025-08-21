@@ -1382,6 +1382,7 @@ const App = () => {
     const [nameFilter, setNameFilter] = useState('all');
     const [selectedTasks, setSelectedTasks] = useState(new Set());
     const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
+    const [isBulkLoading, setIsBulkLoading] = useState(false);
 
     const filteredTasks = tasks.filter(task => {
       const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
